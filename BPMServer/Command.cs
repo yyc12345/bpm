@@ -17,6 +17,7 @@ namespace BPMServer {
             var param = new List<string>(command);
             var head = param[0];
             param.RemoveAt(0);
+            param = CommandSplitter.SplitCommand(String.Join(" ", param));
 
             void runCode() {
                 switch (head) {
@@ -35,6 +36,37 @@ namespace BPMServer {
                                 ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
                                 break;
                         }
+                        break;
+                    case "addpkg":
+                        if (param.Count != 6) {
+                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                            break;
+                        }
+                        PackageManager.AddPackage(param[0], param[1], param[2], param[3], param[4], param[5]);
+                        break;
+                    case "addver":
+                        if (param.Count != 4) {
+                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                            break;
+                        }
+                        PackageManager.AddVersion(param[0], param[1], param[2], param[3]);
+                        break;
+                    case "delpkg":
+                        if (param.Count != 2) {
+                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                            break;
+                        }
+                        PackageManager.RemovePackage(param[0], param[1]);
+                        break;
+                    case "delver":
+                        if (param.Count != 2) {
+                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                            break;
+                        }
+                        PackageManager.RemoveVersion(param[0], param[1]);
+                        break;
+                    default:
+                        ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
                         break;
                 }
             }

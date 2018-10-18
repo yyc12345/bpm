@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BPMServer {
@@ -18,6 +19,7 @@ namespace BPMServer {
             var config = Config.Read();
             General.CoreFileReader = new FileReaderManager();
             General.CoreTcpProcessor = new TcpProcessor(int.Parse(config["IPv4Port"]), int.Parse(config["IPv6Port"]));
+            General.CoreTcpProcessor.StartListen();
 
             //read circle
             string command = "";
@@ -28,10 +30,17 @@ namespace BPMServer {
                     command = Console.ReadLine();
 
                     if (command == "exit") {
+                        General.CoreTcpProcessor.StopListen();
+                        Console.WriteLine("Waiting the release of resources...");
+                        WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                         Environment.Exit(0);
                     }
 
+                    General.CoreTcpProcessor.StopListen();
+                    Console.WriteLine("Waiting the release of resources...");
+                    WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                     Command.CommandExecute(command.Split(' '));
+                    General.CoreTcpProcessor.StartListen();
 
                 }
             }
