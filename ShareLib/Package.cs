@@ -5,17 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ShareLib {
-    public class Package {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string GUID { get; set; }
-        public string Author { get; set; }
-        public long ReleaseTime { get; set; }
-        public int Version { get; set; }
-        public List<string> Dependency { get; set; }
-        public List<string> Conflict { get; set; }
-        public PackageType Type { get; set; }
-    }
+    //public class Package {
+    //    public string Name { get; set; }
+    //    public string Description { get; set; }
+    //    public string GUID { get; set; }
+    //    public string Author { get; set; }
+    //    public long ReleaseTime { get; set; }
+    //    public int Version { get; set; }
+    //    public List<string> Dependency { get; set; }
+    //    public List<string> Conflict { get; set; }
+    //    public PackageType Type { get; set; }
+    //}
 
     public enum PackageType {
         Mod,

@@ -35,7 +35,8 @@ namespace BallancePackageManager.BPMCore {
                 Console.WriteLine(item);
             }
             Console.WriteLine("");
-            ConsoleAssistance.WriteLine("conflict: ", ConsoleColor.Yellow);
+            if (!cache.reverseConflict) ConsoleAssistance.WriteLine("conflict: ", ConsoleColor.Yellow);
+            else ConsoleAssistance.WriteLine("only compatible with: ", ConsoleColor.Yellow);
             if (cache.conflict.Count() == 0) ConsoleAssistance.WriteLine("None", ConsoleColor.Yellow);
             foreach (var item in cache.conflict) {
                 Console.WriteLine(item);
@@ -47,7 +48,7 @@ namespace BallancePackageManager.BPMCore {
 
     public class PackageJson {
         public string[] dependency { get; set; }
-        //public bool reverseConflict { get; set; }
+        public bool reverseConflict { get; set; }
         public string[] conflict { get; set; }
     }
 
