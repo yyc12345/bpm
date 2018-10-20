@@ -20,6 +20,7 @@ namespace BallancePackageManager.BPMCore {
             Console.WriteLine(Download.JudgeDownloadResult(res));
             if (res != Download.DownloadResult.OK && res != Download.DownloadResult.ExistedLocalFile) {
                 ConsoleAssistance.WriteLine("Fail to read JSON file", ConsoleColor.Red);
+                return;
             }
 
             var fs = new StreamReader(ConsoleAssistance.WorkPath + @"cache\dependency\" + packageName + ".json", Encoding.UTF8);

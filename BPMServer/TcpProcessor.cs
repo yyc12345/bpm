@@ -120,13 +120,13 @@ namespace BPMServer {
                 string dataUrl = "";
                 switch (packageType) {
                     case RemoteFileType.Package:
-                        dataUrl = ConsoleAssistance.WorkPath + @"package\" + packageName + ".7z";
+                        dataUrl = ConsoleAssistance.WorkPath + @"package\" + packageName + ".zip";
                         break;
                     case RemoteFileType.PackageInfo:
                         dataUrl = ConsoleAssistance.WorkPath + @"dependency\" + packageName + ".json";
                         break;
                     case RemoteFileType.PackageDatabase:
-                        dataUrl = ConsoleAssistance.WorkPath + ConsoleAssistance.WorkPath + @"package.db";
+                        dataUrl = ConsoleAssistance.WorkPath + @"package.db";
                         break;
                     default:
                         goto end;

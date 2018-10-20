@@ -1,5 +1,10 @@
 # Ballance Package Manager
 
-A *awful* package manager for Ballance.
+A ~~*awful*~~ package manager for Ballance.
 
-Developing...
+Project-Laffey has been done.
+Project-Javelin is developing...
+
+A screenshot for previewing:
+
+![screenshot](screenshot.png)

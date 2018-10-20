@@ -22,7 +22,7 @@ namespace BallancePackageManager.BPMCore {
                 File.Delete(ConsoleAssistance.WorkPath + @"package.db.old");
                 Console.WriteLine("Update package list successfully.");
             } else {
-                File.Delete(ConsoleAssistance.WorkPath + @"package.db");
+                //File.Delete(ConsoleAssistance.WorkPath + @"package.db");
                 File.Move(ConsoleAssistance.WorkPath + @"package.db.old", ConsoleAssistance.WorkPath + @"package.db");
                 Console.WriteLine("Fail to update package list");
             }

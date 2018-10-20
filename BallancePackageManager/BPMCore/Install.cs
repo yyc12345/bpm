@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
-using SevenZip;
+using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 
@@ -32,7 +32,7 @@ namespace BallancePackageManager.BPMCore {
 
             //is installed ?
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            if (installFolder.GetFiles($"{packageName}.json").Any()) {
+            if (installFolder.GetFiles($"{packageName}.py").Any()) {
                 ConsoleAssistance.WriteLine("Package is installed", ConsoleColor.Red);
                 return;
             }
@@ -75,7 +75,7 @@ namespace BallancePackageManager.BPMCore {
             foreach (var item in installFolder.GetFiles($"*.json")) {
                 var cacheSplit = ConsoleAssistance.GetScriptInfo(item.Name);
                 realPackage.Remove($"{cacheSplit.packageName}@{cacheSplit.version}");
-            }          
+            }
 
             packageDbConn.Close();
             //=======================================================================output
@@ -108,6 +108,8 @@ namespace BallancePackageManager.BPMCore {
             var gamePath = Config.Read()["GamePath"];
             ScriptEngine pyEngine = Python.CreateEngine();
 
+            var zipExtractor = new FastZip();
+
             foreach (var item in realPackage) {
                 //download
                 var downloadRes = Download.DownloadPackage(item);
@@ -124,13 +126,12 @@ namespace BallancePackageManager.BPMCore {
 
                 //decompress
                 Console.WriteLine($"Extracting {item}...");
-                using (SevenZipExtractor tmp = new SevenZipExtractor(ConsoleAssistance.WorkPath + @"cache\download" + item + ".7z")) {
-                    tmp.ExtractArchive(ConsoleAssistance.WorkPath + @"cache\decompress");
-                }
+
+                zipExtractor.ExtractZip(ConsoleAssistance.WorkPath + @"cache\download\" + item + ".zip", ConsoleAssistance.WorkPath + @"cache\decompress", "");
 
                 Console.WriteLine($"Running {item}'s setup.py...");
                 dynamic dd = pyEngine.ExecuteFile(ConsoleAssistance.WorkPath + @"cache\decompress\setup.py");
-                bool cacheRes = dd.install(gamePath, ConsoleAssistance.WorkPath + @"cache\decompress", "");
+                bool cacheRes = dd.install(gamePath, ConsoleAssistance.WorkPath + @"cache\decompress");
                 if (!cacheRes) {
                     ConsoleAssistance.WriteLine("Installer report a error. Operation is cancled", ConsoleColor.Red);
                     return;
@@ -150,7 +151,7 @@ namespace BallancePackageManager.BPMCore {
         static string GetVersionNatrually(string packageName, SQLiteConnection sql) {
             if (packageName.Contains("@")) return packageName;
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            var cache = installFolder.GetFiles($"{packageName}@*.json");
+            var cache = installFolder.GetFiles($"{packageName}@*.py");
             if (!cache.Any()) return GetTopVersion(packageName, sql);
             else {
                 var cache2 = ConsoleAssistance.GetScriptInfo(cache[0].Name);
@@ -190,8 +191,8 @@ namespace BallancePackageManager.BPMCore {
 
                 foreach (var item in nowList) {
                     //download
-                    Console.WriteLine($"Downloading {corePackage}'s infomation...");
-                    res = Download.DownloadPackageInfo(corePackage);
+                    Console.WriteLine($"Downloading {item}'s infomation...");
+                    res = Download.DownloadPackageInfo(item);
                     Console.WriteLine(Download.JudgeDownloadResult(res));
                     if (res != Download.DownloadResult.OK && res != Download.DownloadResult.ExistedLocalFile)
                         return (res, null);
@@ -222,45 +223,55 @@ namespace BallancePackageManager.BPMCore {
             var self = packageList.Keys.ToList();
             var self_conflict = new HashSet<string>();
             var self_compatible = new HashSet<string>();
-            foreach (var item in packageList.Values) {
+            foreach (var key in packageList.Keys) {
+                var item = packageList[key];
                 foreach (var item2 in item.conflict) {
                     foreach (var item3 in GetAllVersion(item2, sql)) {
                         if (item.reverseConflict) self_compatible.Add(item3);
                         else self_conflict.Add(item3);
                     }
                 }
+
+                //compatible with themselves
+                if (item.reverseConflict) self_compatible.Add(key);
             }
 
             if (self.Intersect(self_conflict).Any()) return (false, null);
-            if (!self.All((a) => { return self_compatible.Contains(a); })) return (false, null);
+            if (self_compatible.Count != 0 && !self.All((a) => { return self_compatible.Contains(a); })) return (false, null);
 
             //detect installed package=========================================
             //get installed package list
             var installed = new List<string>();
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            foreach (var item in installFolder.GetFiles("*.json")) {
+            foreach (var item in installFolder.GetFiles("*.py")) {
                 var cache = ConsoleAssistance.GetScriptInfo(item.Name);
                 installed.Add($"{cache.packageName}@{cache.version}");
             }
 
             //self --detect--> installed
             var res = (from item in installed
-                       where self_conflict.Contains(item) || !self_compatible.Contains(item)
+                       where self_conflict.Contains(item) || (self_compatible.Count != 0 && !self_compatible.Contains(item))
                        select item).ToList();
 
             //installed --detect--> self
             var realRes = new HashSet<string>(res);
             foreach (var item in installed) {
                 PackageJson jsonCache;
-                using (var fs = new StreamReader(ConsoleAssistance.WorkPath + @"\cache\installed\" + item + ".json", Encoding.UTF8)) {
+                using (var fs = new StreamReader(ConsoleAssistance.WorkPath + @"\cache\dependency\" + item + ".json", Encoding.UTF8)) {
                     jsonCache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
                     fs.Close();
                 }
 
+                var realConflict = new List<string>();
+                foreach (var outter in jsonCache.conflict) {
+                    realConflict.AddRange(GetAllVersion(outter, sql));
+                }
                 if (jsonCache.reverseConflict) {
-                    if (!self.All((a) => { return jsonCache.conflict.Contains(a); })) realRes.Add(item);
+                    var cacheList = new List<string>(realConflict);
+                    cacheList.Add(item);
+                    if (!self.All((a) => { return cacheList.Contains(a); })) realRes.Add(item);
                 } else {
-                    if (self.Intersect(jsonCache.conflict).Any()) realRes.Add(item);
+                    if (self.Intersect(realConflict).Any()) realRes.Add(item);
                 }
             }
 

@@ -17,7 +17,7 @@ namespace ShareLib {
     //    public PackageType Type { get; set; }
     //}
 
-    public enum PackageType {
+    public enum PackageType : int {
         Mod,
         Map,
         Sky,

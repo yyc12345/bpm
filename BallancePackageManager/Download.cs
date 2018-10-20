@@ -17,12 +17,12 @@ namespace BallancePackageManager {
             return (string.Join(":", config, 0, config.Length - 2), int.Parse(config[config.Length - 1]));
         }
 
-        static (FileStream fs, DownloadResult res) GetLocalFile(RemoteFileType remoteFileType, string remoteFile) {
+        static (FileStream fs, DownloadResult res, string url) GetLocalFile(RemoteFileType remoteFileType, string remoteFile) {
 
             string localFile = "";
             switch (remoteFileType) {
                 case RemoteFileType.Package:
-                    localFile = ConsoleAssistance.WorkPath + @"cache\download\" + remoteFile + ".7z";
+                    localFile = ConsoleAssistance.WorkPath + @"cache\download\" + remoteFile + ".zip";
                     break;
                 case RemoteFileType.PackageInfo:
                     localFile = ConsoleAssistance.WorkPath + @"cache\dependency\" + remoteFile + ".json";
@@ -35,13 +35,13 @@ namespace BallancePackageManager {
                     break;
             }
 
-            if (File.Exists(localFile) && remoteFileType != RemoteFileType.Package) return (null, DownloadResult.ExistedLocalFile);
+            if (File.Exists(localFile) /*&& remoteFileType != RemoteFileType.Package*/) return (null, DownloadResult.ExistedLocalFile, localFile);
 
             try {
                 var file = new FileStream(localFile, FileMode.Create, FileAccess.Write);
-                return (file, DownloadResult.OK);
+                return (file, DownloadResult.OK, localFile);
             } catch (Exception) {
-                return (null, DownloadResult.LocalFileOperationError);
+                return (null, DownloadResult.LocalFileOperationError, localFile);
             }
         }
 
@@ -58,9 +58,22 @@ namespace BallancePackageManager {
         }
 
         public static DownloadResult DownloadDatabase() {
-
             var res1 = GetLocalFile(RemoteFileType.PackageDatabase, "");
             if (res1.res != DownloadResult.OK) return res1.res;
+
+            var cache = DownloadDatabaseEx(res1.fs);
+            if (cache != DownloadResult.OK) {
+                res1.fs.Close();
+                res1.fs.Dispose();
+                File.Delete(res1.url);
+            }
+
+            return cache;
+        }
+        static DownloadResult DownloadDatabaseEx(FileStream fs) {
+
+            //var res1 = GetLocalFile(RemoteFileType.PackageDatabase, "");
+            //if (res1.res != DownloadResult.OK) return res1.res;
 
             var remote = GetHostAndPort();
             var res2 = GetClient(remote.host, remote.port);
@@ -93,15 +106,18 @@ namespace BallancePackageManager {
 
                 Package Size | Data
                 */
-                
+
                 var recData = new byte[1];
                 res2.ns.Read(recData, 0, 1);
                 if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.OutdatedVersion;
-                recData = new byte[5];
-                res2.ns.Read(recData, 0, 5);
+                recData = new byte[4];
+                res2.ns.Read(recData, 0, 4);
                 if (BitConverter.ToInt32(recData, 0) != verificationCode) return DownloadResult.VerificationError;
-                if (!BitConverter.ToBoolean(recData, 4)) return DownloadResult.NoPackage;
+                recData = new byte[1];
+                res2.ns.Read(recData, 0, 1);
+                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.NoPackage;
 
+                recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 int packageSize = 1024;
@@ -112,14 +128,14 @@ namespace BallancePackageManager {
                     realData = new byte[packageSize];
                     res2.ns.Read(realData, 0, packageSize);
 
-                    res1.fs.Write(realData, 0, packageSize);
+                    fs.Write(realData, 0, packageSize);
                 }
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
             }
 
-            res1.fs.Close();
+            fs.Close();
             res2.ns.Close();
             //server close tcp.
             //tcp.Close();
@@ -128,9 +144,22 @@ namespace BallancePackageManager {
         }
 
         public static DownloadResult DownloadPackageInfo(string remoteFile) {
-
             var res1 = GetLocalFile(RemoteFileType.PackageInfo, remoteFile);
             if (res1.res != DownloadResult.OK) return res1.res;
+
+            var cache = DownloadPackageInfoEx(remoteFile, res1.fs);
+            if (cache != DownloadResult.OK) {
+                res1.fs.Close();
+                res1.fs.Dispose();
+                File.Delete(res1.url);
+            }
+
+            return cache;
+        }
+        static DownloadResult DownloadPackageInfoEx(string remoteFile, FileStream fs) {
+
+            //var res1 = GetLocalFile(RemoteFileType.PackageInfo, remoteFile);
+            //if (res1.res != DownloadResult.OK) return res1.res;
 
             var remote = GetHostAndPort();
             var res2 = GetClient(remote.host, remote.port);
@@ -166,11 +195,14 @@ namespace BallancePackageManager {
                 var recData = new byte[1];
                 res2.ns.Read(recData, 0, 1);
                 if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.OutdatedVersion;
-                recData = new byte[5];
-                res2.ns.Read(recData, 0, 5);
+                recData = new byte[4];
+                res2.ns.Read(recData, 0, 4);
                 if (BitConverter.ToInt32(recData, 0) != verificationCode) return DownloadResult.VerificationError;
-                if (!BitConverter.ToBoolean(recData, 4)) return DownloadResult.NoPackage;
+                recData = new byte[1];
+                res2.ns.Read(recData, 0, 1);
+                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.NoPackage;
 
+                recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 int packageSize = 1024;
@@ -181,23 +213,36 @@ namespace BallancePackageManager {
                     realData = new byte[packageSize];
                     res2.ns.Read(realData, 0, packageSize);
 
-                    res1.fs.Write(realData, 0, packageSize);
+                    fs.Write(realData, 0, packageSize);
                 }
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
             }
 
-            res1.fs.Close();
+            fs.Close();
             res2.ns.Close();
             return DownloadResult.OK;
 
         }
 
         public static DownloadResult DownloadPackage(string remoteFile) {
-
             var res1 = GetLocalFile(RemoteFileType.Package, remoteFile);
             if (res1.res != DownloadResult.OK) return res1.res;
+
+            var cache = DownloadPackageEx(remoteFile, res1.fs);
+            if (cache != DownloadResult.OK) {
+                res1.fs.Close();
+                res1.fs.Dispose();
+                File.Delete(res1.url);
+            }
+
+            return cache;
+        }
+        static DownloadResult DownloadPackageEx(string remoteFile, FileStream fs) {
+
+            //var res1 = GetLocalFile(RemoteFileType.Package, remoteFile);
+            //if (res1.res != DownloadResult.OK) return res1.res;
 
             var remote = GetHostAndPort();
             var res2 = GetClient(remote.host, remote.port);
@@ -233,11 +278,14 @@ namespace BallancePackageManager {
                 var recData = new byte[1];
                 res2.ns.Read(recData, 0, 1);
                 if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.OutdatedVersion;
-                recData = new byte[5];
-                res2.ns.Read(recData, 0, 5);
+                recData = new byte[4];
+                res2.ns.Read(recData, 0, 4);
                 if (BitConverter.ToInt32(recData, 0) != verificationCode) return DownloadResult.VerificationError;
-                if (!BitConverter.ToBoolean(recData, 4)) return DownloadResult.NoPackage;
+                recData = new byte[1];
+                res2.ns.Read(recData, 0, 1);
+                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.NoPackage;
 
+                recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 int packageSize = 1024;
@@ -248,14 +296,14 @@ namespace BallancePackageManager {
                     realData = new byte[packageSize];
                     res2.ns.Read(realData, 0, packageSize);
 
-                    res1.fs.Write(realData, 0, packageSize);
+                    fs.Write(realData, 0, packageSize);
                 }
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
             }
 
-            res1.fs.Close();
+            fs.Close();
             res2.ns.Close();
             return DownloadResult.OK;
 

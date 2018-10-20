@@ -10,7 +10,7 @@ namespace BPMServer {
 
     public static class PackageManager {
 
-        public static void AddPackage(string name, string aka, string version, string desc, string package_file_path, string dependency_file_path) {
+        public static void AddPackage(string name, string aka, string type, string version, string desc, string package_file_path, string dependency_file_path) {
             var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
             packageDbConn.Open();
 
@@ -23,13 +23,13 @@ namespace BPMServer {
             }
 
             //set database
-            cursor = new SQLiteCommand($"insert into package (name,aka,version,desc) values(\"{name}\",\"{aka}\",\"{version}\",\"{desc}\")", packageDbConn);
+            cursor = new SQLiteCommand($"insert into package (name,aka,type,version,desc) values(\"{name}\",\"{aka}\",{type},\"{version}\",\"{desc}\")", packageDbConn);
             cursor.ExecuteNonQuery();
 
             packageDbConn.Close();
 
             //copy file
-            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.7z");
+            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
             File.Copy(dependency_file_path, ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
@@ -40,6 +40,7 @@ namespace BPMServer {
             packageDbConn.Open();
 
             var cursor = new SQLiteCommand($"select * from package where name == \"{name}\"", packageDbConn);
+            Console.WriteLine(packageDbConn.ConnectionTimeout);         
             var reader = cursor.ExecuteReader();
             if (!reader.Read()) {
                 ConsoleAssistance.WriteLine("Lost package. Please use addpkg to add package.", ConsoleColor.Red);
@@ -59,17 +60,17 @@ namespace BPMServer {
 
             cursor = new SQLiteCommand($"update package set version = \"{newData}\" where name == \"{name}\"", packageDbConn);
             cursor.ExecuteNonQuery();
-
+            
             packageDbConn.Close();
 
             //copy file
-            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.7z");
+            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
             File.Copy(dependency_file_path, ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void RemovePackage(string name, string version) {
+        public static void RemovePackage(string name) {
             var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
             packageDbConn.Open();
 
@@ -82,18 +83,18 @@ namespace BPMServer {
             }
 
             //set database
-            cursor = new SQLiteCommand($"delete from package where name == \"{name}\")", packageDbConn);
+            cursor = new SQLiteCommand($"delete from package where name == \"{name}\"", packageDbConn);
             cursor.ExecuteNonQuery();
 
             packageDbConn.Close();
 
             //del file
             var folder1 = new DirectoryInfo(ConsoleAssistance.WorkPath + @"package");
-            foreach (var item in folder1.GetFiles($"{name}@*.7z")) {
+            foreach (var item in folder1.GetFiles($"{name}@*.zip")) {
                 File.Delete(item.FullName);
             }
             folder1 = new DirectoryInfo(ConsoleAssistance.WorkPath + @"dependency");
-            foreach ( var item in folder1.GetFiles($"{name}@*.json")) {
+            foreach (var item in folder1.GetFiles($"{name}@*.json")) {
                 File.Delete(item.FullName);
             }
 
@@ -135,7 +136,7 @@ namespace BPMServer {
             packageDbConn.Close();
 
             //del file
-            File.Delete(ConsoleAssistance.WorkPath + $"package\\{name}@{version}.7z");
+            File.Delete(ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
             File.Delete(ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);

@@ -67,6 +67,10 @@ namespace BallancePackageManager {
                         OutputHelp();
                         break;
                 }
+
+#if DEBUG
+                Console.ReadKey();
+#endif
             }
 
             Thread td = new Thread(runCode);

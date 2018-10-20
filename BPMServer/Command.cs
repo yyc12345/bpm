@@ -7,73 +7,69 @@ using System.Threading.Tasks;
 
 namespace BPMServer {
     public static class Command {
-        public static void CommandExecute(string[] command) {
+        public static void CommandExecute(string command) {
             if (command.Length == 0) {
                 ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
                 OutputHelp();
                 return;
             }
 
-            var param = new List<string>(command);
+            var param = new List<string>(CommandSplitter.SplitCommand(command));
             var head = param[0];
             param.RemoveAt(0);
-            param = CommandSplitter.SplitCommand(String.Join(" ", param));
 
-            void runCode() {
-                switch (head) {
-                    case "config":
-                        switch (param.Count) {
-                            case 0:
-                                Config.Core();
-                                break;
-                            case 1:
-                                Config.Core(param[0]);
-                                break;
-                            case 2:
-                                Config.Core(param[0], param[1]);
-                                break;
-                            default:
-                                ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
-                                break;
-                        }
-                        break;
-                    case "addpkg":
-                        if (param.Count != 6) {
+            switch (head) {
+                case "config":
+                    switch (param.Count) {
+                        case 0:
+                            Config.Core();
+                            break;
+                        case 1:
+                            Config.Core(param[0]);
+                            break;
+                        case 2:
+                            Config.Core(param[0], param[1]);
+                            break;
+                        default:
                             ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
                             break;
-                        }
-                        PackageManager.AddPackage(param[0], param[1], param[2], param[3], param[4], param[5]);
-                        break;
-                    case "addver":
-                        if (param.Count != 4) {
-                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
-                            break;
-                        }
-                        PackageManager.AddVersion(param[0], param[1], param[2], param[3]);
-                        break;
-                    case "delpkg":
-                        if (param.Count != 2) {
-                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
-                            break;
-                        }
-                        PackageManager.RemovePackage(param[0], param[1]);
-                        break;
-                    case "delver":
-                        if (param.Count != 2) {
-                            ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
-                            break;
-                        }
-                        PackageManager.RemoveVersion(param[0], param[1]);
-                        break;
-                    default:
-                        ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
-                        break;
-                }
+                    }
+                    break;
+                //case "addpkg":
+                //    if (param.Count != 5) {
+                //        ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                //        break;
+                //    }
+                //    PackageManager.AddPackage(param[0], param[1], param[2], param[3], param[4], ConsoleAssistance.WorkPath + $"new_package.zip", ConsoleAssistance.WorkPath + $"new_package.json");
+                //    break;
+                //case "addver":
+                //    if (param.Count != 2) {
+                //        ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                //        break;
+                //    }
+                //    PackageManager.AddVersion(param[0], param[1], ConsoleAssistance.WorkPath + $"new_package.zip", ConsoleAssistance.WorkPath + $"new_package.json");
+                //    break;
+                //case "delpkg":
+                //    if (param.Count != 1) {
+                //        ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                //        break;
+                //    }
+                //    PackageManager.RemovePackage(param[0]);
+                //    break;
+                //case "delver":
+                //    if (param.Count != 2) {
+                //        ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                //        break;
+                //    }
+                //    PackageManager.RemoveVersion(param[0], param[1]);
+                //    break;
+                case "help":
+                    OutputHelp();
+                    break;
+                default:
+                    ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
+                    break;
             }
-
-            Thread td = new Thread(runCode);
-            td.IsBackground = false;
-            td.Start();
 
         }
 
@@ -84,7 +80,11 @@ namespace BPMServer {
             Console.WriteLine("");
             Console.WriteLine("Most used commands:");
             Console.WriteLine("  exit - exit server");
-            Console.WriteLine("  config - edit server config");
+            Console.WriteLine("  config - edit server config(config will be applied in the next startup)");
+            //Console.WriteLine("  addpkg - add a package");
+            //Console.WriteLine("  addver - add a version of the specific package");
+            //Console.WriteLine("  delpkg - delete a package");
+            //Console.WriteLine("  delver - delete a version of the specific package");
             Console.WriteLine("");
             Console.WriteLine("Glory to BKT.");
         }

@@ -25,12 +25,13 @@ namespace BallancePackageManager.BPMCore {
                 return;
             }
 
-            ConsoleAssistance.Write("There are the package which will be deleted: ", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine("There are the package which will be deleted: ", ConsoleColor.Yellow);
             foreach (var item in fileList) {
                 var cache = ConsoleAssistance.GetScriptInfo(item.Name);
                 Console.WriteLine($"{cache.packageName} / {cache.version}");
             }
 
+            Console.WriteLine();
             ConsoleAssistance.Write("Are you sure that you want to remove all of them (Y/N): ", ConsoleColor.Yellow);
             if (Console.ReadLine().ToUpper() != "Y") {
                 ConsoleAssistance.WriteLine("You cancle the operation.", ConsoleColor.Red);

@@ -12,7 +12,7 @@ namespace BPMServer {
         static void Main(string[] args) {
 
             if (!Directory.Exists(ConsoleAssistance.WorkPath + @"package"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");           
+                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
             if (!Directory.Exists(ConsoleAssistance.WorkPath + @"dependency"))
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"dependency");
 
@@ -24,7 +24,7 @@ namespace BPMServer {
             //read circle
             string command = "";
             while (true) {
-                if (Console.ReadKey(true).Key != ConsoleKey.Tab) {
+                if (Console.ReadKey(true).Key == ConsoleKey.Tab) {
                     ConsoleAssistance.Write("BPMServer> ", ConsoleColor.Green);
 
                     command = Console.ReadLine();
@@ -32,14 +32,16 @@ namespace BPMServer {
                     if (command == "exit") {
                         General.CoreTcpProcessor.StopListen();
                         Console.WriteLine("Waiting the release of resources...");
-                        WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
+                        if (General.ManualResetEventList.Count != 0)
+                            WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                         Environment.Exit(0);
                     }
 
                     General.CoreTcpProcessor.StopListen();
                     Console.WriteLine("Waiting the release of resources...");
-                    WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
-                    Command.CommandExecute(command.Split(' '));
+                    if (General.ManualResetEventList.Count != 0)
+                        WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
+                    Command.CommandExecute(command);
                     General.CoreTcpProcessor.StartListen();
 
                 }
