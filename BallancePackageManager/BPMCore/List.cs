@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
 using System.Data.SQLite;
 
 namespace BallancePackageManager.BPMCore {
@@ -13,35 +11,28 @@ namespace BallancePackageManager.BPMCore {
         public static void Core() {
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
 
-            var gamePath = Config.Read()["GamePath"];
-            ScriptEngine pyEngine = Python.CreateEngine();
-
             var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
             packageDbConn.Open();
 
-            int count = installFolder.GetFiles().Count();
+            int count = installFolder.GetDirectories().Count();
             int brokenCount = 0;
             int upgradableCount = 0;
 
-            foreach (var item in installFolder.GetFiles()) {
-                var fileNameInfo = ConsoleAssistance.GetScriptInfo(item.Name);
-                
-                ConsoleAssistance.Write(fileNameInfo.packageName, ConsoleColor.Green);
-                ConsoleAssistance.Write($" / {fileNameInfo.version}");
+            foreach (var item in installFolder.GetDirectories()) {
+                Console.Write($"{item.Name}");
 
                 //check broken
-                dynamic dd = pyEngine.ExecuteFile(ConsoleAssistance.WorkPath + @"cache\installed\" + item.Name);
-                int res = dd.check(gamePath);
-                if (res == 0) {
+                var res = ScriptInvoker.Core(item.FullName, ScriptInvoker.InvokeMethod.Check, "");
+                if (!res) {
                     ConsoleAssistance.Write(" [broken]", ConsoleColor.Red);
                     brokenCount++;
                 }
 
                 //check update                
-                var cursor = new SQLiteCommand($"select * from package where name == \"{fileNameInfo.packageName}\"", packageDbConn);
+                var cursor = new SQLiteCommand($"select * from package where name == \"{item.Name.Split('@')[0]}\"", packageDbConn);
                 var reader = cursor.ExecuteReader();
                 reader.Read();
-                if( reader["version"].ToString().Split(',').Last() != fileNameInfo.version) {
+                if( reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
                     ConsoleAssistance.Write(" [upgradable]", ConsoleColor.Yellow);
                     upgradableCount++;
                 }
@@ -53,7 +44,7 @@ namespace BallancePackageManager.BPMCore {
 
             Console.WriteLine("");
 
-            if (installFolder.GetFiles().Count() == 0) ConsoleAssistance.WriteLine("No installed package", ConsoleColor.Yellow);
+            if (count == 0) ConsoleAssistance.WriteLine("No installed package", ConsoleColor.Yellow);
             else ConsoleAssistance.WriteLine($"Total {count} packages. {brokenCount} broken. {upgradableCount} upgradable.", ConsoleColor.Yellow);
         }
     }

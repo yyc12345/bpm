@@ -16,5 +16,7 @@ namespace BPMServer {
 
         public static object lockList = new object();
 
+        public static OutputStack GeneralOutput = new OutputStack();
+
     }
 }

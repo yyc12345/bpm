@@ -26,7 +26,7 @@ namespace BallancePackageManager.BPMCore {
                 ConsoleAssistance.Write(reader["name"].ToString(), ConsoleColor.Green);
                 Console.Write(" / " + reader["version"].ToString());
 
-                var detectFiles = folder.GetFiles($"{reader["name"].ToString()}@*.py");
+                var detectFiles = folder.GetDirectories($"{reader["name"].ToString()}@");
                 ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{detectFiles.Count()} installed version]", ConsoleColor.Yellow);
 
                 Console.Write($"\naka: {reader["aka"].ToString()}\ndescription: {reader["desc"].ToString()}\n\n");

@@ -1,7 +1,4 @@
-﻿using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,19 +13,18 @@ namespace BallancePackageManager.BPMCore {
             //get info
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
 
-            FileInfo[] fileList;
-            if (packageName.Contains("@")) fileList = installFolder.GetFiles(packageName + ".py");
-            else fileList = installFolder.GetFiles($"{packageName}@*.py");
+            DirectoryInfo[] directoryList;
+            if (packageName.Contains("@")) directoryList = installFolder.GetDirectories($"{packageName}");
+            else directoryList = installFolder.GetDirectories($"{packageName}@*");
 
-            if (fileList.Count() == 0) {
+            if (directoryList.Count() == 0) {
                 ConsoleAssistance.WriteLine("No matched installed package", ConsoleColor.Red);
                 return;
             }
 
             ConsoleAssistance.WriteLine("There are the package which will be deleted: ", ConsoleColor.Yellow);
-            foreach (var item in fileList) {
-                var cache = ConsoleAssistance.GetScriptInfo(item.Name);
-                Console.WriteLine($"{cache.packageName} / {cache.version}");
+            foreach (var item in directoryList) {
+                Console.WriteLine($"{item.Name}");
             }
 
             Console.WriteLine();
@@ -39,25 +35,25 @@ namespace BallancePackageManager.BPMCore {
             }
 
             //remove
-            RealRemove((from i in fileList select i.Name).ToList());
+            var res = RealRemove((from i in directoryList select i.Name).ToList());
+            if (!res) ConsoleAssistance.WriteLine("Operation is aborted", ConsoleColor.Red);
 
             ConsoleAssistance.WriteLine("All packages have been removed", ConsoleColor.Yellow);
         }
 
-        public static void RealRemove(List<string> fileList) {
-            var gamePath = Config.Read()["GamePath"];
-            ScriptEngine pyEngine = Python.CreateEngine();
+        public static bool RealRemove(List<string> packageList) {
+            foreach (var item in packageList) {
+                var res = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, ScriptInvoker.InvokeMethod.Remove, "");
+                if (!res) {
+                    ConsoleAssistance.WriteLine($"A error is throwed when removing {item}", ConsoleColor.Red);
+                    return false;
+                }
+                Directory.Delete(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, true);
 
-            foreach (var item in fileList) {
-                dynamic dd = pyEngine.ExecuteFile(ConsoleAssistance.WorkPath + @"cache\installed\" + item);
-                dd.check(gamePath);
-                File.Delete(ConsoleAssistance.WorkPath + @"cache\installed\" + item);
-
-                var cache = ConsoleAssistance.GetScriptInfo(item);
-                Console.WriteLine($"Remove {cache.packageName} / {cache.version} successfully");
+                Console.WriteLine($"Remove {item} successfully");
             }
 
-            
+            return true;
         }
 
     }

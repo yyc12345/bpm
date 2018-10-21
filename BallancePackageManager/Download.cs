@@ -68,6 +68,7 @@ namespace BallancePackageManager {
                 File.Delete(res1.url);
             }
 
+            Console.Write("\n");
             return cache;
         }
         static DownloadResult DownloadDatabaseEx(FileStream fs) {
@@ -120,6 +121,7 @@ namespace BallancePackageManager {
                 recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
+                var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
@@ -129,6 +131,7 @@ namespace BallancePackageManager {
                     res2.ns.Read(realData, 0, packageSize);
 
                     fs.Write(realData, 0, packageSize);
+                    consoleProgress.Next();
                 }
 
             } catch (Exception) {
@@ -154,6 +157,7 @@ namespace BallancePackageManager {
                 File.Delete(res1.url);
             }
 
+            Console.Write("\n");
             return cache;
         }
         static DownloadResult DownloadPackageInfoEx(string remoteFile, FileStream fs) {
@@ -205,6 +209,7 @@ namespace BallancePackageManager {
                 recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
+                var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
@@ -214,6 +219,7 @@ namespace BallancePackageManager {
                     res2.ns.Read(realData, 0, packageSize);
 
                     fs.Write(realData, 0, packageSize);
+                    consoleProgress.Next();
                 }
 
             } catch (Exception) {
@@ -237,6 +243,7 @@ namespace BallancePackageManager {
                 File.Delete(res1.url);
             }
 
+            Console.Write("\n");
             return cache;
         }
         static DownloadResult DownloadPackageEx(string remoteFile, FileStream fs) {
@@ -288,6 +295,7 @@ namespace BallancePackageManager {
                 recData = new byte[4];
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
+                var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
@@ -297,6 +305,7 @@ namespace BallancePackageManager {
                     res2.ns.Read(realData, 0, packageSize);
 
                     fs.Write(realData, 0, packageSize);
+                    consoleProgress.Next();
                 }
 
             } catch (Exception) {
@@ -349,4 +358,39 @@ namespace BallancePackageManager {
             UnexceptError
         }
     }
+
+    public class DownloadDisplay {
+
+        public DownloadDisplay(int packageCount) {
+            count = packageCount;
+            Next();
+        }
+
+        int count = 0;
+        int current = -1;
+
+        string beforeWords = "";
+
+        public void Next() {
+            current++;
+            var duration = (int)(((double)current / (double)count) * 100);
+            var realDuration = duration / 2;
+            string str = "";
+            for (int q = 0; q < beforeWords.Count(); q++) {
+                str += "\b";
+            }
+            str += "[";
+            for (int i = 0; i < realDuration; i++) {
+                str += "#";
+            }
+            for (int j = 0; j < (50 - realDuration); j++) {
+                str += "=";
+            }
+            str += $"] {duration}%";
+
+            Console.Write(str);
+            beforeWords = str;
+        }
+    }
+
 }

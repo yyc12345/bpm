@@ -1,10 +1,18 @@
+# game_path have slash
+# but current_folder don't have slash
+#
 # Return true to report a successful install, otherwise return false
-def install(game_path,cache_folder):
-    pass
+def install(game_path, current_folder):
+    return True
 
-# Return -1 = Installed 0 = Broken 1 = Uninstalled. If you don't return anything, uninstalled is default status.
+# Return true to report a successful config, otherwise return false
+def deploy(game_path, current_folder, parameter):
+    return True
+
+# Return true to report that package is intact, otherwise return false
 def check(game_path):
-    pass
+    return True
 
+# Return true to report that package is removed successfully, otherwise return false
 def remove(game_path):
-    pass
+    return True

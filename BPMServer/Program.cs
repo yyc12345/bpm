@@ -27,23 +27,23 @@ namespace BPMServer {
                 if (Console.ReadKey(true).Key == ConsoleKey.Tab) {
                     ConsoleAssistance.Write("BPMServer> ", ConsoleColor.Green);
 
+                    General.GeneralOutput.Stop();
                     command = Console.ReadLine();
 
+                    if (command == "crash") {
+                        Environment.Exit(1);
+                    }
                     if (command == "exit") {
                         General.CoreTcpProcessor.StopListen();
                         Console.WriteLine("Waiting the release of resources...");
                         if (General.ManualResetEventList.Count != 0)
                             WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                         Environment.Exit(0);
-                    }
+                    } 
 
-                    General.CoreTcpProcessor.StopListen();
-                    Console.WriteLine("Waiting the release of resources...");
-                    if (General.ManualResetEventList.Count != 0)
-                        WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                     Command.CommandExecute(command);
-                    General.CoreTcpProcessor.StartListen();
 
+                    General.GeneralOutput.Release();
                 }
             }
 

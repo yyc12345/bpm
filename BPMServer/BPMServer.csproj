@@ -71,6 +71,7 @@
     <Compile Include="ConsoleAssistance.cs" />
     <Compile Include="FileReaderManager.cs" />
     <Compile Include="General.cs" />
+    <Compile Include="OutputStack.cs" />
     <Compile Include="PackageManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

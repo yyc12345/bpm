@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.Scripting.Hosting;
-using IronPython.Hosting;
 
 namespace BallancePackageManager.BPMCore {
     public static class Install {
@@ -32,7 +30,7 @@ namespace BallancePackageManager.BPMCore {
 
             //is installed ?
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            if (installFolder.GetFiles($"{packageName}.py").Any()) {
+            if (installFolder.GetDirectories($"{packageName}").Any()) {
                 ConsoleAssistance.WriteLine("Package is installed", ConsoleColor.Red);
                 return;
             }
@@ -65,9 +63,6 @@ namespace BallancePackageManager.BPMCore {
                 ConsoleAssistance.WriteLine("Closed-loop package dependency", ConsoleColor.Red);
                 return;
             }
-
-            //todo: remove installed package
-
 
             //remove installed package
             var realPackage = new List<string>(cache3.res);
@@ -105,8 +100,6 @@ namespace BallancePackageManager.BPMCore {
 
             //install
             Console.WriteLine("Installing selected packages...");
-            var gamePath = Config.Read()["GamePath"];
-            ScriptEngine pyEngine = Python.CreateEngine();
 
             var zipExtractor = new FastZip();
 
@@ -129,16 +122,15 @@ namespace BallancePackageManager.BPMCore {
 
                 zipExtractor.ExtractZip(ConsoleAssistance.WorkPath + @"cache\download\" + item + ".zip", ConsoleAssistance.WorkPath + @"cache\decompress", "");
 
-                Console.WriteLine($"Running {item}'s setup.py...");
-                dynamic dd = pyEngine.ExecuteFile(ConsoleAssistance.WorkPath + @"cache\decompress\setup.py");
-                bool cacheRes = dd.install(gamePath, ConsoleAssistance.WorkPath + @"cache\decompress");
+                Console.WriteLine($"Running package script...");
+                var cacheRes = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"cache\decompress", ScriptInvoker.InvokeMethod.Install, "");
                 if (!cacheRes) {
                     ConsoleAssistance.WriteLine("Installer report a error. Operation is cancled", ConsoleColor.Red);
                     return;
                 }
 
-                Console.WriteLine($"Recording {item}'s info...");
-                File.Copy(ConsoleAssistance.WorkPath + @"cache\decompress\setup.py", ConsoleAssistance.WorkPath + @"cache\installed\" + item + ".py");
+                Console.WriteLine($"Recording {item} info...");
+                ConsoleAssistance.DirectoryCopy(ConsoleAssistance.WorkPath + @"cache\decompress", ConsoleAssistance.WorkPath + @"cache\installed\" + item, true);
 
                 Console.WriteLine($"{item} is installed successfully");
 
@@ -151,12 +143,10 @@ namespace BallancePackageManager.BPMCore {
         static string GetVersionNatrually(string packageName, SQLiteConnection sql) {
             if (packageName.Contains("@")) return packageName;
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            var cache = installFolder.GetFiles($"{packageName}@*.py");
+            var cache = installFolder.GetDirectories($"{packageName}@*");
             if (!cache.Any()) return GetTopVersion(packageName, sql);
-            else {
-                var cache2 = ConsoleAssistance.GetScriptInfo(cache[0].Name);
-                return $"{cache2.packageName}@{cache2.version}";
-            }
+            else return cache[0].Name;
+
         }
 
         static string GetTopVersion(string packageNameWithoutVersion, SQLiteConnection sql) {
@@ -243,9 +233,8 @@ namespace BallancePackageManager.BPMCore {
             //get installed package list
             var installed = new List<string>();
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-            foreach (var item in installFolder.GetFiles("*.py")) {
-                var cache = ConsoleAssistance.GetScriptInfo(item.Name);
-                installed.Add($"{cache.packageName}@{cache.version}");
+            foreach (var item in installFolder.GetDirectories()) {
+                installed.Add(item.Name);
             }
 
             //self --detect--> installed

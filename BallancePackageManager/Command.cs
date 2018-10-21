@@ -25,7 +25,7 @@ namespace BallancePackageManager {
                         Update.Core();
                         break;
                     case "search":
-                        if (param.Count()!=0)
+                        if (param.Count() != 0)
                             Search.Core(param[0]);
                         break;
                     case "install":
@@ -56,8 +56,12 @@ namespace BallancePackageManager {
                         }
                         break;
                     case "show":
-                        if (param.Count() != 0)
+                        if (param.Count != 0)
                             Show.Core(param[0]);
+                        break;
+                    case "deploy":
+                        if (param.Count != 2) ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                        else Deploy.Core(param[0], param[1]);
                         break;
                     case "help":
                         OutputHelp();
@@ -76,7 +80,7 @@ namespace BallancePackageManager {
             Thread td = new Thread(runCode);
             td.IsBackground = false;
             td.Start();
-            
+
         }
 
         static void OutputHelp() {
@@ -92,6 +96,7 @@ namespace BallancePackageManager {
             Console.WriteLine("  remove - remove packages");
             //Console.WriteLine("  autoremove - Remove automatically all unused packages");
             Console.WriteLine("  update - update list of available packages");
+            Console.WriteLine("  deploy - deploy package (especially for map and resources)");
             //Console.WriteLine("  full-upgrade - upgrade the system by removing/installing/upgrading packages");
             //Console.WriteLine("  restore - remove all installed package");
             Console.WriteLine("  config - edit the config");

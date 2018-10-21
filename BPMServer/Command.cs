@@ -35,6 +35,9 @@ namespace BPMServer {
                             break;
                     }
                     break;
+                case "client":
+                    ConsoleAssistance.WriteLine($"Current client: {General.ManualResetEventList.Count}", ConsoleColor.Yellow);
+                    break;
                 //case "addpkg":
                 //    if (param.Count != 5) {
                 //        ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
@@ -80,7 +83,9 @@ namespace BPMServer {
             Console.WriteLine("");
             Console.WriteLine("Most used commands:");
             Console.WriteLine("  exit - exit server");
+            Console.WriteLine("  crash - kill server without any hesitation (for emergency)");
             Console.WriteLine("  config - edit server config(config will be applied in the next startup)");
+            Console.WriteLine("  client - list the number of client which is connecting this server");
             //Console.WriteLine("  addpkg - add a package");
             //Console.WriteLine("  addver - add a version of the specific package");
             //Console.WriteLine("  delpkg - delete a package");
