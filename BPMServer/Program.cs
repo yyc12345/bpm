@@ -1,15 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ShareLib;
 
 namespace BPMServer {
     class Program {
 
         static void Main(string[] args) {
+
+            //detect daemon
+            var td = new System.Threading.Thread(() => {
+                while (true) {
+
+                    var cache = Process.GetProcessesByName("BPMSDaemon");
+                    if (!cache.Any()) {
+                        Process.Start(ConsoleAssistance.WorkPath + "BPMSDaemon.exe");
+                        Console.WriteLine("Start daemon...");
+                    }
+
+                    System.Threading.Thread.Sleep(30 * 1000);
+                }
+            });
+            td.IsBackground = true;
+            td.Start();
 
             if (!Directory.Exists(ConsoleAssistance.WorkPath + @"package"))
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
@@ -31,6 +49,14 @@ namespace BPMServer {
                     command = Console.ReadLine();
 
                     if (command == "crash") {
+                        try {
+                            td.Abort();
+                            foreach (var item in Process.GetProcessesByName("BPMSDaemon")) {
+                                item.Kill();
+                            }
+                        } catch (Exception) {
+                            //pass
+                        }
                         Environment.Exit(1);
                     }
                     if (command == "exit") {
@@ -38,8 +64,17 @@ namespace BPMServer {
                         Console.WriteLine("Waiting the release of resources...");
                         if (General.ManualResetEventList.Count != 0)
                             WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
+
+                        try {
+                            td.Abort();
+                            foreach (var item in Process.GetProcessesByName("BPMSDaemon")) {
+                                item.Kill();
+                            }
+                        } catch (Exception) {
+                            //pass
+                        }
                         Environment.Exit(0);
-                    } 
+                    }
 
                     Command.CommandExecute(command);
 

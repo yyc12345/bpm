@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
     public static class Show {

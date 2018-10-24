@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using ICSharpCode.SharpZipLib.Zip;
+using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
     public static class Install {
@@ -68,7 +69,7 @@ namespace BallancePackageManager.BPMCore {
             var realPackage = new List<string>(cache3.res);
 
             foreach (var item in installFolder.GetFiles($"*.json")) {
-                var cacheSplit = ConsoleAssistance.GetScriptInfo(item.Name);
+                var cacheSplit = PackageAssistance.GetScriptInfo(item.Name);
                 realPackage.Remove($"{cacheSplit.packageName}@{cacheSplit.version}");
             }
 
@@ -130,7 +131,7 @@ namespace BallancePackageManager.BPMCore {
                 }
 
                 Console.WriteLine($"Recording {item} info...");
-                ConsoleAssistance.DirectoryCopy(ConsoleAssistance.WorkPath + @"cache\decompress", ConsoleAssistance.WorkPath + @"cache\installed\" + item, true);
+                PackageAssistance.DirectoryCopy(ConsoleAssistance.WorkPath + @"cache\decompress", ConsoleAssistance.WorkPath + @"cache\installed\" + item, true);
 
                 Console.WriteLine($"{item} is installed successfully");
 

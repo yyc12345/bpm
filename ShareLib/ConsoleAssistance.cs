@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BPMServer {
+namespace ShareLib {
+
     public static class ConsoleAssistance {
 
         public static string WorkPath {

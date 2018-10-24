@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
     public static class Deploy {

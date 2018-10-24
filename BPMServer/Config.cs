@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using ShareLib;
 
 namespace BPMServer {
     public static class Config {

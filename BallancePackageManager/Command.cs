@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BallancePackageManager.BPMCore;
 using System.Threading;
+using ShareLib;
 
 namespace BallancePackageManager {
     public static class Command {

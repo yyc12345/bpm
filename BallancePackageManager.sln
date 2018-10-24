@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareLib", "ShareLib\ShareL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMServer", "BPMServer\BPMServer.csproj", "{E9DF5F9E-381B-48A6-B49B-2A66F240A3D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMSDaemon", "BPMSDaemon\BPMSDaemon.csproj", "{AF3A6AC1-D6B5-4190-8468-C82BF2ABCF90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMSMaintenance", "BPMSMaintenance\BPMSMaintenance.csproj", "{06BBA6CD-F005-4CD5-B346-08E38CA07AE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{E9DF5F9E-381B-48A6-B49B-2A66F240A3D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9DF5F9E-381B-48A6-B49B-2A66F240A3D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9DF5F9E-381B-48A6-B49B-2A66F240A3D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF3A6AC1-D6B5-4190-8468-C82BF2ABCF90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF3A6AC1-D6B5-4190-8468-C82BF2ABCF90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF3A6AC1-D6B5-4190-8468-C82BF2ABCF90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF3A6AC1-D6B5-4190-8468-C82BF2ABCF90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06BBA6CD-F005-4CD5-B346-08E38CA07AE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06BBA6CD-F005-4CD5-B346-08E38CA07AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06BBA6CD-F005-4CD5-B346-08E38CA07AE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06BBA6CD-F005-4CD5-B346-08E38CA07AE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

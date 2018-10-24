@@ -8,6 +8,7 @@ using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Utils;
 using System.IO;
+using ShareLib;
 
 namespace BallancePackageManager {
     public static class ScriptInvoker {
@@ -20,7 +21,7 @@ namespace BallancePackageManager {
             if (!file.Any()) return false;
             for(int i = 1; i <= file.Count(); i++) {
                 var cacheFile = folder.GetFiles($"setup-{i}.*")[0];
-                var cache = ConsoleAssistance.GetScriptInfo(cacheFile.Name);
+                var cache = PackageAssistance.GetScriptInfo(cacheFile.Name);
                 switch (cache.suffix) {
                     case ".py":
                         if (!PythonInvoker(cacheFile.FullName, method, gamePath, invokePath, parameter))

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Data.SQLite;
+using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
     public static class Search {

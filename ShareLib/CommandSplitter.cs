@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BPMServer {
+namespace ShareLib {
     public static class CommandSplitter {
 
         public static List<string> SplitCommand(string command) {
