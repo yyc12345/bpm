@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,16 @@ namespace BPMServer {
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
             if (!Directory.Exists(ConsoleAssistance.WorkPath + @"dependency"))
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"dependency");
+
+            //detect database
+            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+                SQLiteConnection.CreateFile(ConsoleAssistance.WorkPath + "package.db");
+                var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
+                packageDbConn.Open();
+                var cachecursor = new SQLiteCommand($"create table package (name TEXT primary key not null, aka TEXT, type INTEGER not null, version TEXT not null, desc TEXT)", packageDbConn);
+                cachecursor.ExecuteNonQuery();
+                packageDbConn.Close();
+            }
 
             var config = Config.Read();
             General.CoreFileReader = new FileReaderManager();

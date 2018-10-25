@@ -83,6 +83,7 @@ namespace BallancePackageManager.BPMCore {
             Console.WriteLine("");
 
             ConsoleAssistance.WriteLine("There are the packages which will be removed due to the conflict: ", ConsoleColor.Yellow);
+            if (cache2.res.Count == 0) ConsoleAssistance.WriteLine("None", ConsoleColor.Yellow);
             foreach (var item in cache2.res) {
                 Console.WriteLine(item);
             }

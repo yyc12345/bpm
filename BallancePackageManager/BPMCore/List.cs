@@ -22,20 +22,21 @@ namespace BallancePackageManager.BPMCore {
             foreach (var item in installFolder.GetDirectories()) {
                 Console.Write($"{item.Name}");
 
+                //check update and output type             
+                var cursor = new SQLiteCommand($"select * from package where name == \"{item.Name.Split('@')[0]}\"", packageDbConn);
+                var reader = cursor.ExecuteReader();
+                reader.Read();
+                Console.Write(" [" + ((PackageType)int.Parse(reader["type"].ToString())).ToString() + "]");
+                if (reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
+                    ConsoleAssistance.Write(" [upgradable]", ConsoleColor.Yellow);
+                    upgradableCount++;
+                }
+
                 //check broken
                 var res = ScriptInvoker.Core(item.FullName, ScriptInvoker.InvokeMethod.Check, "");
                 if (!res) {
                     ConsoleAssistance.Write(" [broken]", ConsoleColor.Red);
                     brokenCount++;
-                }
-
-                //check update                
-                var cursor = new SQLiteCommand($"select * from package where name == \"{item.Name.Split('@')[0]}\"", packageDbConn);
-                var reader = cursor.ExecuteReader();
-                reader.Read();
-                if( reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
-                    ConsoleAssistance.Write(" [upgradable]", ConsoleColor.Yellow);
-                    upgradableCount++;
                 }
 
                 Console.Write("\n");

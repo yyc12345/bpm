@@ -25,12 +25,12 @@ namespace BallancePackageManager.BPMCore {
             int count = 0;
             while (reader.Read()) {
                 ConsoleAssistance.Write(reader["name"].ToString(), ConsoleColor.Green);
-                Console.Write(" / " + reader["version"].ToString());
+                Console.Write(" @ " + reader["version"].ToString());
 
                 var detectFiles = folder.GetDirectories($"{reader["name"].ToString()}@");
                 ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{detectFiles.Count()} installed version]", ConsoleColor.Yellow);
 
-                Console.Write($"\naka: {reader["aka"].ToString()}\ndescription: {reader["desc"].ToString()}\n\n");
+                Console.Write($"\naka: {reader["aka"].ToString()}\ntype: {((PackageType)int.Parse(reader["type"].ToString())).ToString()}\ndescription: {reader["desc"].ToString()}\n\n");
                 count++;
             }
 

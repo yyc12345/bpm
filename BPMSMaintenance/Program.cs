@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,28 @@ namespace BPMSMaintenance {
     class Program {
         static void Main(string[] args) {
 
-            ConsoleAssistance.WriteLine("Welcome to BPMS Maintenance app.", ConsoleColor.Yellow);
+            //detect folder
+            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"package"))
+                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
+            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"dependency"))
+                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"dependency");
 
+            //detect database
+            bool isNew = false;
+            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+                SQLiteConnection.CreateFile(ConsoleAssistance.WorkPath + "package.db");
+                isNew = true;
+            }
+                
             var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
             packageDbConn.Open();
+
+            if (isNew) {
+                var cachecursor = new SQLiteCommand($"create table package (name TEXT primary key not null, aka TEXT, type INTEGER not null, version TEXT not null, desc TEXT)", packageDbConn);
+                cachecursor.ExecuteNonQuery();
+            }
+
+            ConsoleAssistance.WriteLine("Welcome to BPMS Maintenance app.", ConsoleColor.Yellow);
 
             string command = "";
             while (true) {
