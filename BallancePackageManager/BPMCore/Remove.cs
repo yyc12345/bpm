@@ -10,6 +10,10 @@ namespace BallancePackageManager.BPMCore {
     public static class Remove {
 
         public static void Core(string packageName) {
+            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                return;
+            }
 
             //get info
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
@@ -19,39 +23,43 @@ namespace BallancePackageManager.BPMCore {
             else directoryList = installFolder.GetDirectories($"{packageName}@*");
 
             if (directoryList.Count() == 0) {
-                ConsoleAssistance.WriteLine("No matched installed package", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
                 return;
             }
 
-            ConsoleAssistance.WriteLine("There are the package which will be deleted: ", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("Remove_RemoveList"), ConsoleColor.Yellow);
             foreach (var item in directoryList) {
                 Console.WriteLine($"{item.Name}");
             }
 
             Console.WriteLine();
-            ConsoleAssistance.Write("Are you sure that you want to remove all of them (Y/N): ", ConsoleColor.Yellow);
+            ConsoleAssistance.Write(I18N.Core("General_Continue"), ConsoleColor.Yellow);
             if (Console.ReadLine().ToUpper() != "Y") {
-                ConsoleAssistance.WriteLine("You cancle the operation.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_CancleOperation"), ConsoleColor.Red);
                 return;
             }
 
             //remove
             var res = RealRemove((from i in directoryList select i.Name).ToList());
-            if (!res) ConsoleAssistance.WriteLine("Operation is aborted", ConsoleColor.Red);
+            if (!res) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_OperationAborted"), ConsoleColor.Red);
+                return;
+            }
 
-            ConsoleAssistance.WriteLine("All packages have been removed", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("General_AllOperationDown"), ConsoleColor.Yellow);
         }
 
         public static bool RealRemove(List<string> packageList) {
             foreach (var item in packageList) {
+                Console.WriteLine(I18N.Core("Remove_Removing", item));
                 var res = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, ScriptInvoker.InvokeMethod.Remove, "");
                 if (!res) {
-                    ConsoleAssistance.WriteLine($"A error is throwed when removing {item}", ConsoleColor.Red);
+                    ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     return false;
                 }
                 Directory.Delete(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, true);
 
-                Console.WriteLine($"Remove {item} successfully");
+                Console.WriteLine(I18N.Core("Remove_Success", item));
             }
 
             return true;

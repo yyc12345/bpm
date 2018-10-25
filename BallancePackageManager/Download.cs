@@ -321,27 +321,28 @@ namespace BallancePackageManager {
         public static string JudgeDownloadResult(DownloadResult res) {
             switch (res) {
                 case DownloadResult.OK:
-                    return "Download OK";
+                    //return "Download OK";
                 case DownloadResult.ExistedLocalFile:
-                    return "Detect existed local package cache. Jump downloading";
+                    //return "Detect existed local package cache. Jump downloading";
                 case DownloadResult.LocalFileOperationError:
-                    return "Couldn't operate local package cache";
+                    //return "Couldn't operate local package cache";
                 case DownloadResult.NetworkError:
-                    return "Network error";
+                    //return "Network error";
                 case DownloadResult.VerificationError:
-                    return "Un-matched verification code";
+                    //return "Un-matched verification code";
                 case DownloadResult.Timeout:
-                    return "Network timeout";
+                    //return "Network timeout";
                 case DownloadResult.NoPackage:
-                    return "No matched package";
+                    //return "No matched package";
                 case DownloadResult.RemoteServerError:
-                    return "Remote server return a error";
+                    //return "Remote server return a error";
                 case DownloadResult.OutdatedVersion:
-                    return "Outdated bpm version";
+                    //return "Outdated bpm version";
                 case DownloadResult.UnexceptError:
-                    return "Unknow error";
+                    //return "Unknow error";
+                    return I18N.Core($"Download_{res.ToString()}");
                 default:
-                    return "Unknow error";
+                    return I18N.Core("Download_UnexceptError");
             }
         }
 

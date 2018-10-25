@@ -12,7 +12,7 @@ namespace BallancePackageManager.BPMCore {
 
         public static void Core(string packageName) {
             if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
-                ConsoleAssistance.WriteLine("No package database. Please use *bpm update* to update your local package database.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
@@ -28,9 +28,9 @@ namespace BallancePackageManager.BPMCore {
                 Console.Write(" @ " + reader["version"].ToString());
 
                 var detectFiles = folder.GetDirectories($"{reader["name"].ToString()}@");
-                ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{detectFiles.Count()} installed version]", ConsoleColor.Yellow);
+                ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{I18N.Core("Search_InstalledVersion", detectFiles.Count().ToString())}]", ConsoleColor.Yellow);
 
-                Console.Write($"\naka: {reader["aka"].ToString()}\ntype: {((PackageType)int.Parse(reader["type"].ToString())).ToString()}\ndescription: {reader["desc"].ToString()}\n\n");
+                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{reader["aka"].ToString()}\n{I18N.Core("Search&Show_Type")}{((PackageType)int.Parse(reader["type"].ToString())).ToString()}\n{I18N.Core("Search&Show_Desc")}{reader["desc"].ToString()}\n\n");
                 count++;
             }
 

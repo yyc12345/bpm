@@ -13,8 +13,12 @@ namespace BallancePackageManager.BPMCore {
     public static class Install {
 
         public static void Core(string packageName) {
+            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                return;
+            }
 
-            Console.WriteLine("Collecting pakcage infomation...");
+            Console.WriteLine(I18N.Core("Install_CollectingPackageInfo"));
 
             //=================================================================pre-process
             //name is legal
@@ -24,7 +28,7 @@ namespace BallancePackageManager.BPMCore {
             var cursor = new SQLiteCommand($"select * from package where name == \"{(packageName.Contains("@") ? packageName.Split('@')[0] : packageName)}\"", packageDbConn);
             var reader = cursor.ExecuteReader();
             if (!reader.Read()) {
-                ConsoleAssistance.WriteLine("Package is not existed", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
                 return;
             }
             packageName = GetVersionNatrually(packageName, packageDbConn);
@@ -32,25 +36,25 @@ namespace BallancePackageManager.BPMCore {
             //is installed ?
             var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
             if (installFolder.GetDirectories($"{packageName}").Any()) {
-                ConsoleAssistance.WriteLine("Package is installed", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("Install_InstalledPackage"), ConsoleColor.Red);
                 return;
             }
 
             //====================================================================get-info
             //get denpendency tree
-            Console.WriteLine("Building dependency tree...");
+            Console.WriteLine(I18N.Core("Install_BuildingDependencyTree"));
             var cache1 = GetPackageInfo(packageName, packageDbConn);
 
             //conflict detect
-            Console.WriteLine("Detecting package conflict...");
+            Console.WriteLine(I18N.Core("Install_DetectConflict"));
             var cache2 = DetectConflict(cache1.topologyMap, packageDbConn);
             if (!cache2.status) {
-                ConsoleAssistance.WriteLine("The package, which you want to install, is self-conflict", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("Install_SelfConflict"), ConsoleColor.Red);
                 return;
             }
 
             //sort dependency
-            Console.WriteLine("Sorting dependency tree...");
+            Console.WriteLine(I18N.Core("Install_SortingDependencyTree"));
             var cache1_1 = new Dictionary<string, List<string>>();
             foreach (var item in cache1.topologyMap.Keys) {
                 var cache = new List<string>();
@@ -61,7 +65,7 @@ namespace BallancePackageManager.BPMCore {
             }
             var cache3 = KahnTopologySort(cache1_1);
             if (!cache3.status) {
-                ConsoleAssistance.WriteLine("Closed-loop package dependency", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("Install_CloseLoop"), ConsoleColor.Red);
                 return;
             }
 
@@ -76,42 +80,43 @@ namespace BallancePackageManager.BPMCore {
             packageDbConn.Close();
             //=======================================================================output
 
-            ConsoleAssistance.WriteLine("There are the packages which will be installed: ", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("Install_InstallList"), ConsoleColor.Yellow);
             foreach (var item in realPackage) {
                 Console.WriteLine(item);
             }
             Console.WriteLine("");
 
-            ConsoleAssistance.WriteLine("There are the packages which will be removed due to the conflict: ", ConsoleColor.Yellow);
-            if (cache2.res.Count == 0) ConsoleAssistance.WriteLine("None", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("Install_RemoveList"), ConsoleColor.Yellow);
+            if (cache2.res.Count == 0) ConsoleAssistance.WriteLine(I18N.Core("General_None"), ConsoleColor.Yellow);
             foreach (var item in cache2.res) {
                 Console.WriteLine(item);
             }
             Console.WriteLine("");
 
-            ConsoleAssistance.Write("Are you sure that you want to continue (Y/N): ", ConsoleColor.Yellow);
+            ConsoleAssistance.Write(I18N.Core("General_Continue"), ConsoleColor.Yellow);
             if (Console.ReadLine().ToUpper() != "Y") {
-                ConsoleAssistance.WriteLine("You cancle the operation.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_CancleOperation"), ConsoleColor.Red);
                 return;
             }
 
             //============================================================================install
             //remove
-            Console.WriteLine("Removing selected packages...");
+            Console.WriteLine(I18N.Core("Install_RemovingSelectedPackage"));
             Remove.RealRemove(cache2.res);
 
             //install
-            Console.WriteLine("Installing selected packages...");
+            Console.WriteLine(I18N.Core("Install_RemoveList"));
 
             var zipExtractor = new FastZip();
 
             foreach (var item in realPackage) {
+                Console.WriteLine(I18N.Core("Install_InstallItem", item));
                 //download
                 var downloadRes = Download.DownloadPackage(item);
                 Console.WriteLine(Download.JudgeDownloadResult(downloadRes));
 
                 if (downloadRes != Download.DownloadResult.OK && downloadRes != Download.DownloadResult.ExistedLocalFile) {
-                    ConsoleAssistance.WriteLine("A error occured. Operation is cancled", ConsoleColor.Red);
+                    ConsoleAssistance.WriteLine(I18N.Core("General_NetworkError"), ConsoleColor.Red);
                     return;
                 }
 
@@ -120,25 +125,25 @@ namespace BallancePackageManager.BPMCore {
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\decompress");
 
                 //decompress
-                Console.WriteLine($"Extracting {item}...");
+                Console.WriteLine(I18N.Core("Install_ExtractItem", item));
 
                 zipExtractor.ExtractZip(ConsoleAssistance.WorkPath + @"cache\download\" + item + ".zip", ConsoleAssistance.WorkPath + @"cache\decompress", "");
 
-                Console.WriteLine($"Running package script...");
+                Console.WriteLine(I18N.Core("Install_RunScriptItem", item));
                 var cacheRes = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"cache\decompress", ScriptInvoker.InvokeMethod.Install, "");
                 if (!cacheRes) {
                     ConsoleAssistance.WriteLine("Installer report a error. Operation is cancled", ConsoleColor.Red);
                     return;
                 }
 
-                Console.WriteLine($"Recording {item} info...");
+                Console.WriteLine(I18N.Core("Install_RecordItem", item));
                 PackageAssistance.DirectoryCopy(ConsoleAssistance.WorkPath + @"cache\decompress", ConsoleAssistance.WorkPath + @"cache\installed\" + item, true);
 
-                Console.WriteLine($"{item} is installed successfully");
+                Console.WriteLine(I18N.Core("Install_Success", item));
 
             }
 
-            ConsoleAssistance.WriteLine("All operation have done.", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("General_AllOperationDown"), ConsoleColor.Yellow);
 
         }
 

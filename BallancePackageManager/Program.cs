@@ -69,9 +69,12 @@ namespace BallancePackageManager {
             if (!Directory.Exists(ConsoleAssistance.WorkPath + @"cache\dependency"))
                 Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\dependency");
 
+            //init i18n
+            I18N.Init(BPMCore.Config.Read()["Language"]);
+
             var config = BPMCore.Config.Read();
             while (config["GamePath"] == "") {
-                Console.WriteLine("Type a proper path to place Ballance and its package pls. :)");
+                Console.WriteLine(I18N.Core("Init_TypePath"));
                 config["GamePath"] = Console.ReadLine();
             }
             BPMCore.Config.Save(config);

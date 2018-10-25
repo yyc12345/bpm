@@ -42,15 +42,15 @@ namespace BallancePackageManager.BPMCore {
         public static void Core(string itemName) {
             var cache = Read();
             if (cache.Keys.Contains(itemName)) Console.WriteLine(cache[itemName]);
-            else ConsoleAssistance.WriteLine("Invalid config", ConsoleColor.Red);
+            else ConsoleAssistance.WriteLine(I18N.Core("Config_InvalidConfig"), ConsoleColor.Red);
         }
         public static void Core(string itemName, string newValue) {
             var cache = Read();
             if (cache.Keys.Contains(itemName)) {
                 cache[itemName] = newValue;
                 Save(cache);
-                Console.WriteLine("New config has been applied");
-            } else ConsoleAssistance.WriteLine("Invalid config", ConsoleColor.Red);
+                Console.WriteLine(I18N.Core("Config_AppliedNewConfig"));
+            } else ConsoleAssistance.WriteLine(I18N.Core("Config_InvalidConfig"), ConsoleColor.Red);
         }
 
         public static void Save(Dictionary<string, string> config) {

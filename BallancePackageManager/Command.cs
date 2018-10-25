@@ -11,7 +11,7 @@ namespace BallancePackageManager {
     public static class Command {
         public static void CommandExecute(string[] command) {
             if (command.Length == 0) {
-                ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidCommand"), ConsoleColor.Red);
                 OutputHelp();
                 return;
             }
@@ -52,7 +52,7 @@ namespace BallancePackageManager {
                                 Config.Core(param[0], param[1]);
                                 break;
                             default:
-                                ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                                ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                                 break;
                         }
                         break;
@@ -61,14 +61,14 @@ namespace BallancePackageManager {
                             Show.Core(param[0]);
                         break;
                     case "deploy":
-                        if (param.Count != 2) ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
+                        if (param.Count != 2) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Deploy.Core(param[0], param[1]);
                         break;
                     case "help":
                         OutputHelp();
                         break;
                     default:
-                        ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
+                        ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidCommand"), ConsoleColor.Red);
                         OutputHelp();
                         break;
                 }
@@ -85,25 +85,25 @@ namespace BallancePackageManager {
         }
 
         static void OutputHelp() {
-            Console.WriteLine("Usage: bpm option [command]");
+            Console.WriteLine(I18N.Core("Help_1"));
             Console.WriteLine("");
-            Console.WriteLine("bpm is a commandline package manager and provides commands for searching and managing as well as querying information about Ballance packages.");
+            Console.WriteLine(I18N.Core("Help_2"));
             Console.WriteLine("");
-            Console.WriteLine("Most used commands:");
-            Console.WriteLine("  list - list packages based on package names");
-            Console.WriteLine("  search - search in package descriptions");
-            Console.WriteLine("  show - show package details");
-            Console.WriteLine("  install - install packages");
-            Console.WriteLine("  remove - remove packages");
+            Console.WriteLine(I18N.Core("Help_3"));
+            Console.WriteLine(I18N.Core("Help_4"));
+            Console.WriteLine(I18N.Core("Help_5"));
+            Console.WriteLine(I18N.Core("Help_6"));
+            Console.WriteLine(I18N.Core("Help_7"));
+            Console.WriteLine(I18N.Core("Help_8"));
             //Console.WriteLine("  autoremove - Remove automatically all unused packages");
-            Console.WriteLine("  update - update list of available packages");
-            Console.WriteLine("  deploy - deploy package (especially for map and resources)");
+            Console.WriteLine(I18N.Core("Help_9"));
+            Console.WriteLine(I18N.Core("Help_10"));
             //Console.WriteLine("  full-upgrade - upgrade the system by removing/installing/upgrading packages");
             //Console.WriteLine("  restore - remove all installed package");
-            Console.WriteLine("  config - edit the config");
+            Console.WriteLine(I18N.Core("Help_11"));
             //Console.WriteLine("  exit - exit bpm");
             Console.WriteLine("");
-            Console.WriteLine("Glory to BKT.");
+            Console.WriteLine(I18N.Core("Help_12"));
         }
     }
 }

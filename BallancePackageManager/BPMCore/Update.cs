@@ -21,11 +21,11 @@ namespace BallancePackageManager.BPMCore {
 
             if (res == Download.DownloadResult.OK) {
                 File.Delete(ConsoleAssistance.WorkPath + @"package.db.old");
-                Console.WriteLine("Update package list successfully.");
+                Console.WriteLine(I18N.Core("Update_Success"));
             } else {
                 //File.Delete(ConsoleAssistance.WorkPath + @"package.db");
                 File.Move(ConsoleAssistance.WorkPath + @"package.db.old", ConsoleAssistance.WorkPath + @"package.db");
-                Console.WriteLine("Fail to update package list");
+                Console.WriteLine(I18N.Core("Update_Fail"));
             }
                 
 
