@@ -12,7 +12,7 @@ def deploy(game_path, current_folder, parameter):
     return True
 
 # Return true to report that package is intact, otherwise return false
-def check(game_path):
+def check(game_path, current_folder):
     return True
 
 # Return true to report that package is removed successfully, otherwise return false

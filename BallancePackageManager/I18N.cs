@@ -123,7 +123,7 @@ namespace BallancePackageManager {
             {"General_AllOperationDown", "All operation done!"},
             {"General_None", "None"},
             {"General_Continue", "Do you want to continue (Y/N): "},
-            {"General_CancleOperation", "You cancle the operation."},
+            {"General_CancelOperation", "You cancel the operation."},
             {"General_NetworkError", "A network error occured."},
             {"General_OperationAborted", "Operation is aborted"},
             {"General_NoDatabase", "No package database. Please use *bpm update* to update your local package database."}
@@ -218,7 +218,7 @@ namespace BallancePackageManager {
             {"General_AllOperationDown", "所有操作都已完成！"},
             {"General_None", "无"},
             {"General_Continue", "您想要继续吗？ (Y/N): "},
-            {"General_CancleOperation", "您取消了操作"},
+            {"General_CancelOperation", "您取消了操作"},
             {"General_NetworkError", "发生了网络错误"},
             {"General_OperationAborted", "操作已终止"},
             {"General_NoDatabase", "没有包数据库，请使用 bpm update 更新您的本地的包数据库"}

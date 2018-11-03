@@ -95,7 +95,7 @@ namespace BallancePackageManager.BPMCore {
 
             ConsoleAssistance.Write(I18N.Core("General_Continue"), ConsoleColor.Yellow);
             if (Console.ReadLine().ToUpper() != "Y") {
-                ConsoleAssistance.WriteLine(I18N.Core("General_CancleOperation"), ConsoleColor.Red);
+                ConsoleAssistance.WriteLine(I18N.Core("General_CancelOperation"), ConsoleColor.Red);
                 return;
             }
 
