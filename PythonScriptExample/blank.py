@@ -14,5 +14,5 @@ def check(game_path, current_folder):
     return True
 
 # Return true to report that package is removed successfully, otherwise return false
-def remove(game_path):
+def remove(game_path, current_folder):
     return True

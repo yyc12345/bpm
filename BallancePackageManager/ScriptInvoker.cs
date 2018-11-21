@@ -46,7 +46,7 @@ namespace BallancePackageManager {
                 case InvokeMethod.Deploy:
                     return (bool)dd.deploy(game_path, current_folder, parameter);
                 case InvokeMethod.Remove:
-                    return (bool)dd.remove(game_path);
+                    return (bool)dd.remove(game_path, current_folder);
                 default:
                     return false;
             }

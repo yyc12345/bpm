@@ -77,19 +77,24 @@ def check(game_path, current_folder):
     return True
 
 # Return true to report that package is removed successfully, otherwise return false
-def remove(game_path):
+def remove(game_path, current_folder):
     for item in file_list:
         if os.path.exists(current_folder + "\\" + item):
             remove_with_restore(game_path + "\\Sounds\\" + item)
     return True
 
+# ========================================== assistant function
+
 def copy_with_backups(target, origin):
     if os.path.exists(target):
         if not os.path.exists(target + ".bak"):
             os.rename(target, target+ ".bak")
+        else:
+            os.remove(target)
     shutil.copyfile(origin, target)
 
 def remove_with_restore(target):
-    os.remove(target)
+    if os.path.exists(target):
+        os.remove(target)
     if os.path.exists(target+".bak"):
         os.rename(target+".bak", target)
