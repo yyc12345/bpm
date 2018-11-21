@@ -75,23 +75,6 @@ def deploy(game_path, current_folder, parameter):
         return False
     return True
 
-# Return true to report that package is intact, otherwise return false
-def check(game_path, current_folder):
-    deploy_cache = read_deploy(current_folder + "\\deploy.cfg")
-    if deploy_cache == "":
-        return True
-    target_file_1 = game_path + "Sounds\\Music_Theme_" + deploy_cache + "_1.wav"
-    target_file_2 = game_path + "Sounds\\Music_Theme_" + deploy_cache + "_2.wav"
-    target_file_3 = game_path + "Sounds\\Music_Theme_" + deploy_cache + "_3.wav"
-
-    if os.path.getsize(current_folder + "\\1.wav") != os.path.getsize(target_file_1):
-        return False
-    if os.path.getsize(current_folder + "\\2.wav") != os.path.getsize(target_file_2):
-        return False
-    if os.path.getsize(current_folder + "\\3.wav") != os.path.getsize(target_file_3):
-        return False
-    return True
-
 # Return true to report that package is removed successfully, otherwise return false
 def remove(game_path, current_folder):
     try:

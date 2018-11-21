@@ -41,8 +41,6 @@ namespace BallancePackageManager {
             switch (method) {
                 case InvokeMethod.Install:
                     return (bool)dd.install(game_path, current_folder);
-                case InvokeMethod.Check:
-                    return (bool)dd.check(game_path, current_folder);
                 case InvokeMethod.Deploy:
                     return (bool)dd.deploy(game_path, current_folder, parameter);
                 case InvokeMethod.Remove:
@@ -54,7 +52,6 @@ namespace BallancePackageManager {
 
         public enum InvokeMethod {
             Install,
-            Check,
             Deploy,
             Remove
         }

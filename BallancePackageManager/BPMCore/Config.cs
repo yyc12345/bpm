@@ -25,7 +25,7 @@ namespace BallancePackageManager.BPMCore {
         static void Init() {
             using (StreamWriter fs = new StreamWriter(Environment.CurrentDirectory + "\\config.cfg", false, Encoding.UTF8)) {
                 var cache = new Dictionary<string, string>() {
-                    {"Sources" , "yyc.bkt.moe:6161" },
+                    {"Sources" , "yyc.bkt.moe:3850" },
                     {"GamePath" , "" },
                     {"Language", "en-us" }
                 };

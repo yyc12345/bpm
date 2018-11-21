@@ -83,7 +83,7 @@ namespace BallancePackageManager {
             //list
             {"List_Upgradable", "upgradable"},
             {"List_Broken", "broken"},
-            {"List_Total", "Total {0} packages. {1} broken. {2} upgradable."},
+            {"List_Total", "Total {0} packages."},
 
             //remove
             {"Remove_RemoveList", "There are the package which will be deleted: "},
@@ -126,8 +126,17 @@ namespace BallancePackageManager {
             {"General_CancelOperation", "You cancel the operation."},
             {"General_NetworkError", "A network error occured."},
             {"General_OperationAborted", "Operation is aborted"},
-            {"General_NoDatabase", "No package database. Please use *bpm update* to update your local package database."}
+            {"General_NoDatabase", "No package database. Please use *bpm update* to update your local package database."},
 
+            //type
+            {"PackageType_Mod", "Mod"},
+            {"PackageType_Map", "Map"},
+            {"PackageType_Sky", "Sky"},
+            {"PackageType_Texture", "Texture"},
+            {"PackageType_SoundEffect", "SoundEffect"},
+            {"PackageType_BGM", "BGM"},
+            {"PackageType_App", "App"},
+            {"PackageType_Miscellaneous", "Miscellaneous"}
         };
 
         static Dictionary<string, string> Language_zh_cn = new Dictionary<string, string>() {
@@ -178,7 +187,7 @@ namespace BallancePackageManager {
             //list
             {"List_Upgradable", "可升级的"},
             {"List_Broken", "损坏的"},
-            {"List_Total", "共 {0} 个包。 {1} 个损坏的。 {2} 个可升级的。"},
+            {"List_Total", "共 {0} 个包。"},
 
             //remove
             {"Remove_RemoveList", "下列包将会被移除："},
@@ -221,8 +230,17 @@ namespace BallancePackageManager {
             {"General_CancelOperation", "您取消了操作"},
             {"General_NetworkError", "发生了网络错误"},
             {"General_OperationAborted", "操作已终止"},
-            {"General_NoDatabase", "没有包数据库，请使用 bpm update 更新您的本地的包数据库"}
-
+            {"General_NoDatabase", "没有包数据库，请使用 bpm update 更新您的本地的包数据库"},
+            
+            //type
+            {"PackageType_Mod", "模组"},
+            {"PackageType_Map", "地图"},
+            {"PackageType_Sky", "天空背景"},
+            {"PackageType_Texture", "材质"},
+            {"PackageType_SoundEffect", "音效"},
+            {"PackageType_BGM", "背景音乐"},
+            {"PackageType_App", "应用程序"},
+            {"PackageType_Miscellaneous", "杂项"}
         };
 
         #endregion

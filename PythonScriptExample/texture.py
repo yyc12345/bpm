@@ -99,17 +99,6 @@ def install(game_path, current_folder):
 def deploy(game_path, current_folder, parameter):
     return True
 
-# Return true to report that package is intact, otherwise return false
-def check(game_path, current_folder):
-    for item in file_list:
-        if not os.path.exists(current_folder + "\\" + item):
-            continue
-        if not os.path.exists(game_path + "\\Textures\\" + item):
-            return False
-        if os.path.getsize(game_path + "\\Textures\\" + item) != os.path.getsize(current_folder + "\\" + item):
-            return False
-    return True
-
 # Return true to report that package is removed successfully, otherwise return false
 def remove(game_path, current_folder):
     for item in file_list:

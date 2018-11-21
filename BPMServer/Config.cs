@@ -25,8 +25,8 @@ namespace BPMServer {
         static void Init() {
             using (StreamWriter fs = new StreamWriter(Environment.CurrentDirectory + "\\config.cfg", false, Encoding.UTF8)) {
                 var cache = new Dictionary<string, string>() {
-                    {"IPv4Port" , "6161" },
-                    {"IPv6Port" , "8181" }
+                    {"IPv4Port" , "3850" },
+                    {"IPv6Port" , "3851" }
                 };
                 fs.Write(JsonConvert.SerializeObject(cache));
                 fs.Close();

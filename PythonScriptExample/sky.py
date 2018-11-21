@@ -82,25 +82,6 @@ def deploy(game_path, current_folder, parameter):
         return False
     return True
 
-# Return true to report that package is intact, otherwise return false
-def check(game_path, current_folder):
-    deploy_cache = read_deploy(current_folder + "\\deploy.cfg")
-    if deploy_cache == "":
-        return True
-    target_file = game_path + "Textures\\Sky\\Sky_" + deploy_cache
-
-    if os.path.getsize(current_folder + "\\back.bmp") != os.path.getsize(target_file + "_Back.BMP"):
-        return False
-    if os.path.getsize(current_folder + "\\down.bmp") != os.path.getsize(target_file + "_Down.BMP"):
-        return False
-    if os.path.getsize(current_folder + "\\front.bmp") != os.path.getsize(target_file + "_Front.BMP"):
-        return False
-    if os.path.getsize(current_folder + "\\left.bmp") != os.path.getsize(target_file + "_Left.BMP"):
-        return False
-    if os.path.getsize(current_folder + "\\right.bmp") != os.path.getsize(target_file + "_Right.BMP"):
-        return False
-    return True
-
 # Return true to report that package is removed successfully, otherwise return false
 def remove(game_path, current_folder):
     try:

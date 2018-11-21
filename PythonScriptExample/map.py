@@ -28,17 +28,6 @@ def deploy(game_path, current_folder, parameter):
         return False
     return True
 
-# Return true to report that package is intact, otherwise return false
-def check(game_path, current_folder):
-    local_file = current_folder + "\\MapNameInPackage.nmo"
-    deploy_cache = read_deploy(current_folder + "\\deploy.cfg")
-    if deploy_cache == "":
-        return True
-    level = int(deploy_cache)
-    target_file = game_path + "3D Entities\\Level\\Level_" + ("0" if level < 10 else "" ) + deploy_cache + ".NMO"
-
-    return os.path.getsize(local_file) == os.path.getsize(target_file)
-
 # Return true to report that package is removed successfully, otherwise return false
 def remove(game_path, current_folder):
     try:

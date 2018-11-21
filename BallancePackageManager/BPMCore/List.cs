@@ -21,28 +21,28 @@ namespace BallancePackageManager.BPMCore {
             packageDbConn.Open();
 
             int count = installFolder.GetDirectories().Count();
-            int brokenCount = 0;
-            int upgradableCount = 0;
+            //int brokenCount = 0;
+            //int upgradableCount = 0;
 
             foreach (var item in installFolder.GetDirectories()) {
                 Console.Write($"{item.Name}");
 
-                //check update and output type             
+                //check update and output type
                 var cursor = new SQLiteCommand($"select * from package where name == \"{item.Name.Split('@')[0]}\"", packageDbConn);
                 var reader = cursor.ExecuteReader();
                 reader.Read();
-                Console.Write(" [" + ((PackageType)int.Parse(reader["type"].ToString())).ToString() + "]");
-                if (reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
-                    ConsoleAssistance.Write($" [{I18N.Core("List_Upgradable")}]", ConsoleColor.Yellow);
-                    upgradableCount++;
-                }
+                Console.Write(" [" + I18N.Core($"PackageType_{((PackageType)int.Parse(reader["type"].ToString())).ToString()}") + "]");
+                //if (reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
+                //    ConsoleAssistance.Write($" [{I18N.Core("List_Upgradable")}]", ConsoleColor.Yellow);
+                //    upgradableCount++;
+                //}
 
-                //check broken
-                var res = ScriptInvoker.Core(item.FullName, ScriptInvoker.InvokeMethod.Check, "");
-                if (!res) {
-                    ConsoleAssistance.Write($" [{I18N.Core("List_Broken")}]", ConsoleColor.Red);
-                    brokenCount++;
-                }
+                ////check broken
+                //var res = ScriptInvoker.Core(item.FullName, ScriptInvoker.InvokeMethod.Check, "");
+                //if (!res) {
+                //    ConsoleAssistance.Write($" [{I18N.Core("List_Broken")}]", ConsoleColor.Red);
+                //    brokenCount++;
+                //}
 
                 Console.Write("\n");
             }
@@ -52,7 +52,7 @@ namespace BallancePackageManager.BPMCore {
             Console.WriteLine("");
 
             if (count == 0) ConsoleAssistance.WriteLine(I18N.Core("General_None"), ConsoleColor.Yellow);
-            else ConsoleAssistance.WriteLine(I18N.Core("List_Total", count.ToString(), brokenCount.ToString(), upgradableCount.ToString()), ConsoleColor.Yellow);
+            else ConsoleAssistance.WriteLine(I18N.Core("List_Total", count.ToString()), ConsoleColor.Yellow);
         }
     }
 }
