@@ -44,6 +44,10 @@ namespace BallancePackageManager.BPMCore {
             //get denpendency tree
             Console.WriteLine(I18N.Core("Install_BuildingDependencyTree"));
             var cache1 = GetPackageInfo(packageName, packageDbConn);
+            if (!cache1.res) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_NetworkError"), ConsoleColor.Red);
+                return;
+            }
 
             //conflict detect
             Console.WriteLine(I18N.Core("Install_DetectConflict"));
@@ -176,7 +180,7 @@ namespace BallancePackageManager.BPMCore {
             return res;
         }
 
-        static (Download.DownloadResult res, Dictionary<string, PackageJson> topologyMap) GetPackageInfo(string corePackage, SQLiteConnection sql) {
+        static (bool res, Dictionary<string, PackageJson> topologyMap) GetPackageInfo(string corePackage, SQLiteConnection sql) {
 
             Download.DownloadResult res;
             //corePackage = GetTopVersion(corePackage, sql);
@@ -192,7 +196,7 @@ namespace BallancePackageManager.BPMCore {
                     res = Download.DownloadPackageInfo(item);
                     Console.WriteLine(Download.JudgeDownloadResult(res));
                     if (res != Download.DownloadResult.OK && res != Download.DownloadResult.ExistedLocalFile)
-                        return (res, null);
+                        return (false, null);
 
                     var fs = new StreamReader(ConsoleAssistance.WorkPath + @"cache\dependency\" + item + ".json", Encoding.UTF8);
                     var cache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
@@ -211,7 +215,7 @@ namespace BallancePackageManager.BPMCore {
                 nowList = new List<string>(nextList);
             }
 
-            return (Download.DownloadResult.OK, result);
+            return (true, result);
         }
 
         static (bool status, List<string> res) DetectConflict(Dictionary<string, PackageJson> packageList, SQLiteConnection sql) {

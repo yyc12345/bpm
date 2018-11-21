@@ -13,10 +13,6 @@
   - 多语言支持
   - 多脚本协同执行
   - 脚本函数简介与参数解析
-    * install
-    * config
-    * check
-    * remove
 * 脚本建议
 * 包依赖与冲突文件
   - dependency
@@ -110,5 +106,5 @@ Python安装脚本共有4个函数，分别是install，check，deploy，remove�
 
 * 下载时，json文件被下载到`cache/dependency`，zip文件被下载到`cache/download`，并都永久驻留作为本地缓存。
 * 安装时，zip文件被解包到`cache/decompress`，执行脚本后，`cache/decompress`下所有文件被移动到`cache/installed/xxx`下，xxx代表当前包的名字
-* 部署，检测时，从`cache/install/xxx`执行脚本
+* 部署时，从`cache/install/xxx`执行脚本
 * 删除时，从`cache/install/xxx`执行脚本，执行完毕后，删除文件夹`cache/install/xxx`
