@@ -1,13 +1,13 @@
-﻿using System;
+﻿using ShareLib;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
-    public static class Deploy {
+    public static class Help {
 
         public static void Core(string packageName, string parameter) {
             if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
@@ -31,15 +31,18 @@ namespace BallancePackageManager.BPMCore {
             }
 
             var finalFolder = directoryList[0];
-            var res = ScriptInvoker.Core(finalFolder.FullName, ScriptInvoker.InvokeMethod.Deploy, parameter);
+            var res = ScriptInvoker.Core(finalFolder.FullName, ScriptInvoker.InvokeMethod.Help, "");
             if (res.status) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                 ConsoleAssistance.WriteLine(res.desc, ConsoleColor.Red);
                 return;
             }
+            if (res.desc == "") ConsoleAssistance.WriteLine(I18N.Core("Help_NoHelp"), ConsoleColor.Yellow);
+            else Console.WriteLine(res.desc);
 
             ConsoleAssistance.WriteLine(I18N.Core("General_AllOperationDown"), ConsoleColor.Yellow);
         }
+
 
     }
 }

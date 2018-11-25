@@ -135,8 +135,9 @@ namespace BallancePackageManager.BPMCore {
 
                 Console.WriteLine(I18N.Core("Install_RunScriptItem", item));
                 var cacheRes = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"cache\decompress", ScriptInvoker.InvokeMethod.Install, "");
-                if (!cacheRes) {
-                    ConsoleAssistance.WriteLine("Installer report a error. Operation is cancled", ConsoleColor.Red);
+                if (cacheRes.status) {
+                    ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
+                    ConsoleAssistance.WriteLine(cacheRes.desc, ConsoleColor.Red);
                     return;
                 }
 

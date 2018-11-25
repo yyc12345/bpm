@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="BPMCore\Config.cs" />
     <Compile Include="BPMCore\Deploy.cs" />
+    <Compile Include="BPMCore\Help.cs" />
     <Compile Include="I18N.cs" />
     <Compile Include="BPMCore\Install.cs" />
     <Compile Include="BPMCore\List.cs" />

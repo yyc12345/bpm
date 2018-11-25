@@ -106,7 +106,7 @@ namespace BallancePackageManager {
             
             //download.cs
             {"Download_OK", "Download OK" },
-            {"Download_ExistedLocalFile", "Detect existed local package cache. Jump downloading" },
+            {"Download_ExistedLocalFile", "Detect existed local package cache. Skip downloading" },
             {"Download_LocalFileOperationError", "Couldn't operate local package cache" },
             {"Download_NetworkError", "Network error" },
             {"Download_VerificationError", "Un-matched verification code" },
@@ -119,7 +119,7 @@ namespace BallancePackageManager {
             //general words
             {"General_SpecificVersion", "You should specific a version of your package"},
             {"General_NoMatchedPackage", "No matched package"},
-            {"General_ScriptError", "A error is occured when executing package script"},
+            {"General_ScriptError", "A error is occured when executing package script. Error detail:"},
             {"General_AllOperationDown", "All operation done!"},
             {"General_None", "None"},
             {"General_Continue", "Do you want to continue (Y/N): "},
@@ -136,7 +136,16 @@ namespace BallancePackageManager {
             {"PackageType_SoundEffect", "SoundEffect"},
             {"PackageType_BGM", "BGM"},
             {"PackageType_App", "App"},
-            {"PackageType_Miscellaneous", "Miscellaneous"}
+            {"PackageType_Miscellaneous", "Miscellaneous"},
+
+            //script invoker
+            {"ScriptInvoker_NoScriptFile", "No script file"},
+            {"ScriptInvoker_UnsupportedScript", "Unsupported script file"},
+            {"ScriptInvoker_NoMethod", "No matched method"},
+            {"ScriptInvoker_InvokeError", "Invoke error"},
+
+            //help
+            {"Help_NoHelp", "There are no help provided by package."}
         };
 
         static Dictionary<string, string> Language_zh_cn = new Dictionary<string, string>() {
@@ -223,7 +232,7 @@ namespace BallancePackageManager {
             //general words
             {"General_SpecificVersion", "您应当为您当前指定的包指定一个特定的版本"},
             {"General_NoMatchedPackage", "没有匹配的包"},
-            {"General_ScriptError", "在执行包脚本期间发生了错误"},
+            {"General_ScriptError", "在执行包脚本期间发生了错误。错误详情："},
             {"General_AllOperationDown", "所有操作都已完成！"},
             {"General_None", "无"},
             {"General_Continue", "您想要继续吗？ (Y/N): "},
@@ -240,7 +249,16 @@ namespace BallancePackageManager {
             {"PackageType_SoundEffect", "音效"},
             {"PackageType_BGM", "背景音乐"},
             {"PackageType_App", "应用程序"},
-            {"PackageType_Miscellaneous", "杂项"}
+            {"PackageType_Miscellaneous", "杂项"},
+
+            //script invoker
+            {"ScriptInvoker_NoScriptFile", "没有脚本文件"},
+            {"ScriptInvoker_UnsupportedScript", "不支持的脚本文件"},
+            {"ScriptInvoker_NoMethod", "没有匹配的函数"},
+            {"ScriptInvoker_InvokeError", "调用错误"},
+
+            //help
+            {"Help_NoHelp", "没有由包提供的帮助"}
         };
 
         #endregion
