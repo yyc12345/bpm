@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,6 +13,7 @@ namespace BPMServer {
 
         static void Main(string[] args) {
 
+            /*
             //detect daemon
             var td = new System.Threading.Thread(() => {
                 while (true) {
@@ -29,20 +29,18 @@ namespace BPMServer {
             });
             td.IsBackground = true;
             td.Start();
+            */
 
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"package"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"dependency"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"dependency");
+            if (!Directory.Exists(Information.WorkPath.Enter("package").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("package").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("dependency").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("dependency").Path);
 
             //detect database
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
-                SQLiteConnection.CreateFile(ConsoleAssistance.WorkPath + "package.db");
-                var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
-                packageDbConn.Open();
-                var cachecursor = new SQLiteCommand($"create table package (name TEXT primary key not null, aka TEXT, type INTEGER not null, version TEXT not null, desc TEXT)", packageDbConn);
-                cachecursor.ExecuteNonQuery();
-                packageDbConn.Close();
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
+                var createDb = new Database();
+                createDb.Open();
+                createDb.Close();
             }
 
             var config = Config.Read();
@@ -60,6 +58,7 @@ namespace BPMServer {
                     command = Console.ReadLine();
 
                     if (command == "crash") {
+                        /*
                         try {
                             td.Abort();
                             foreach (var item in Process.GetProcessesByName("BPMSDaemon")) {
@@ -68,6 +67,7 @@ namespace BPMServer {
                         } catch (Exception) {
                             //pass
                         }
+                        */
                         Environment.Exit(1);
                     }
                     if (command == "exit") {
@@ -75,7 +75,7 @@ namespace BPMServer {
                         Console.WriteLine("Waiting the release of resources...");
                         if (General.ManualResetEventList.Count != 0)
                             WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
-
+                        /*
                         try {
                             td.Abort();
                             foreach (var item in Process.GetProcessesByName("BPMSDaemon")) {
@@ -84,6 +84,7 @@ namespace BPMServer {
                         } catch (Exception) {
                             //pass
                         }
+                        */
                         Environment.Exit(0);
                     }
 

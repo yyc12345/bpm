@@ -3,45 +3,57 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SQLite;
 using System.IO;
 using ShareLib;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.EntityFrameworkCore.Sqlite.Query;
+//using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace BPMSMaintenance {
 
     public static class PackageManager {
 
-        public static void AddPackage(SQLiteConnection packageDbConn, string name, string aka, string type, string version, string desc, string package_file_path, string dependency_file_path) {
+        public static void AddPackage(Database packageDbConn, string name, string aka, string type, string version, string desc, string package_file_path, string dependency_file_path) {
 
-            var cursor = new SQLiteCommand($"select * from package where name == \"{name}\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            if (reader.Read()) {
+            var reader = packageDbConn.CoreDbContext.package
+                .Where(x => x.name == name)
+                .ToList();
+            if (reader.Any()) {
                 ConsoleAssistance.WriteLine("Existed package. Please use addver to add package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            cursor = new SQLiteCommand($"insert into package (name,aka,type,version,desc) values(\"{name}\",\"{aka}\",{type},\"{version}\",\"{desc}\")", packageDbConn);
-            cursor.ExecuteNonQuery();
+            var newObj = new DatabaseItem();
+            newObj.name = name;
+            newObj.aka = aka;
+            newObj.type = int.Parse(type);
+            newObj.version = version;
+            newObj.desc = desc;
+            packageDbConn.CoreDbContext.package.Add(newObj);
 
             //copy file
-            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
-            File.Copy(dependency_file_path, ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
+            File.Copy(package_file_path, Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
+            File.Copy(dependency_file_path, Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void AddVersion(SQLiteConnection packageDbConn, string name, string version, string package_file_path, string dependency_file_path) {
+        public static void AddVersion(Database packageDbConn, string name, string version, string package_file_path, string dependency_file_path) {
 
-            var cursor = new SQLiteCommand($"select * from package where name == \"{name}\"", packageDbConn);    
-            var reader = cursor.ExecuteReader();
-            if (!reader.Read()) {
+            var reader = (from item in packageDbConn.CoreDbContext.package
+                          where item.name == name
+                          select item).ToList();
+            if (!reader.Any()) {
                 ConsoleAssistance.WriteLine("Lost package. Please use addpkg to add package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            var versionList = reader["version"].ToString().Split(',');
+            var versionList = reader[0].version.Split(',');
             if (versionList.Contains(version)) {
                 ConsoleAssistance.WriteLine("Existed version.", ConsoleColor.Red);
                 return;
@@ -49,35 +61,34 @@ namespace BPMSMaintenance {
 
             var newData = String.Join(",", versionList) + $",{version}";
 
-            cursor = new SQLiteCommand($"update package set version = \"{newData}\" where name == \"{name}\"", packageDbConn);
-            cursor.ExecuteNonQuery();
+            reader[0].version = newData;
 
             //copy file
-            File.Copy(package_file_path, ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
-            File.Copy(dependency_file_path, ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
+            File.Copy(package_file_path, Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
+            File.Copy(dependency_file_path, Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void RemovePackage(SQLiteConnection packageDbConn, string name) {
+        public static void RemovePackage(Database packageDbConn, string name) {
 
-            var cursor = new SQLiteCommand($"select * from package where name == \"{name}\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            if (!reader.Read()) {
+            var reader = (from item in packageDbConn.CoreDbContext.package
+                          where item.name == name
+                          select item).ToList();
+            if (!reader.Any()) {
                 ConsoleAssistance.WriteLine("Lost package. Check out your package name.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            cursor = new SQLiteCommand($"delete from package where name == \"{name}\"", packageDbConn);
-            cursor.ExecuteNonQuery();
+            packageDbConn.CoreDbContext.package.RemoveRange(reader);
 
             //del file
-            var folder1 = new DirectoryInfo(ConsoleAssistance.WorkPath + @"package");
+            var folder1 = new DirectoryInfo(Information.WorkPath.Enter("package").Path);
             foreach (var item in folder1.GetFiles($"{name}@*.zip")) {
                 File.Delete(item.FullName);
             }
-            folder1 = new DirectoryInfo(ConsoleAssistance.WorkPath + @"dependency");
+            folder1 = new DirectoryInfo(Information.WorkPath.Enter("dependency").Path);
             foreach (var item in folder1.GetFiles($"{name}@*.json")) {
                 File.Delete(item.FullName);
             }
@@ -85,17 +96,18 @@ namespace BPMSMaintenance {
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void RemoveVersion(SQLiteConnection packageDbConn, string name, string version) {
+        public static void RemoveVersion(Database packageDbConn, string name, string version) {
 
-            var cursor = new SQLiteCommand($"select * from package where name == \"{name}\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            if (!reader.Read()) {
+            var reader = (from item in packageDbConn.CoreDbContext.package
+                          where item.name == name
+                          select item).ToList();
+            if (!reader.Any()) {
                 ConsoleAssistance.WriteLine("Lost package. Check out your package name.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            var versionList = new List<string>(reader["version"].ToString().Split(','));
+            var versionList = new List<string>(reader[0].version.Split(','));
             if (!versionList.Contains(version)) {
                 ConsoleAssistance.WriteLine("No matched version.", ConsoleColor.Red);
                 return;
@@ -109,12 +121,11 @@ namespace BPMSMaintenance {
 
             var newData = String.Join(",", versionList);
 
-            cursor = new SQLiteCommand($"update package set version = \"{newData}\" where name == \"{name}\"", packageDbConn);
-            cursor.ExecuteNonQuery();
+            reader[0].version = newData;
 
             //del file
-            File.Delete(ConsoleAssistance.WorkPath + $"package\\{name}@{version}.zip");
-            File.Delete(ConsoleAssistance.WorkPath + $"dependency\\{name}@{version}.json");
+            File.Delete(Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
+            File.Delete(Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }

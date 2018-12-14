@@ -8,14 +8,6 @@ namespace ShareLib {
 
     public static class ConsoleAssistance {
 
-        public static string WorkPath {
-            get {
-                var res = Environment.CurrentDirectory;
-                res += res[res.Length - 1] == '\\' ? "" : "\\";
-                return res;
-            }
-        }
-
         /// <summary>
         /// the update of console.writeline()
         /// </summary>

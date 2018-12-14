@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,25 +11,13 @@ namespace BPMSMaintenance {
         static void Main(string[] args) {
 
             //detect folder
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"package"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"package");
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"dependency"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"dependency");
+            if (!Directory.Exists(Information.WorkPath.Enter("package").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("package").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("dependency").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("dependency").Path);
 
-            //detect database
-            bool isNew = false;
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
-                SQLiteConnection.CreateFile(ConsoleAssistance.WorkPath + "package.db");
-                isNew = true;
-            }
-                
-            var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
+            var packageDbConn = new Database();
             packageDbConn.Open();
-
-            if (isNew) {
-                var cachecursor = new SQLiteCommand($"create table package (name TEXT primary key not null, aka TEXT, type INTEGER not null, version TEXT not null, desc TEXT)", packageDbConn);
-                cachecursor.ExecuteNonQuery();
-            }
 
             ConsoleAssistance.WriteLine("Welcome to BPMS Maintenance app.", ConsoleColor.Yellow);
 
@@ -53,14 +40,14 @@ namespace BPMSMaintenance {
                             ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
                             break;
                         }
-                        PackageManager.AddPackage(packageDbConn, param[0], param[1], param[2], param[3], param[4], ConsoleAssistance.WorkPath + $"new_package.zip", ConsoleAssistance.WorkPath + $"new_package.json");
+                        PackageManager.AddPackage(packageDbConn, param[0], param[1], param[2], param[3], param[4], Information.WorkPath.Enter("new_package.zip").Path, Information.WorkPath.Enter("new_package.json").Path);
                         break;
                     case "addver":
                         if (param.Count != 2) {
                             ConsoleAssistance.WriteLine("Invalid parameter count", ConsoleColor.Red);
                             break;
                         }
-                        PackageManager.AddVersion(packageDbConn, param[0], param[1], ConsoleAssistance.WorkPath + $"new_package.zip", ConsoleAssistance.WorkPath + $"new_package.json");
+                        PackageManager.AddVersion(packageDbConn, param[0], param[1], Information.WorkPath.Enter("new_package.zip").Path, Information.WorkPath.Enter("new_package.json").Path);
                         break;
                     case "delpkg":
                         if (param.Count != 1) {

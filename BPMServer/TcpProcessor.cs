@@ -66,7 +66,7 @@ namespace BPMServer {
                     lock (General.lockList) {
                         General.ManualResetEventList.Add(mre);
                     }
-                    
+
                     ThreadPool.QueueUserWorkItem(new WaitCallback(ClientProcessor), (client, mre));
                 } catch (Exception) {
                     //jump
@@ -127,13 +127,13 @@ namespace BPMServer {
                 string dataUrl = "";
                 switch (packageType) {
                     case RemoteFileType.Package:
-                        dataUrl = ConsoleAssistance.WorkPath + @"package\" + packageName + ".zip";
+                        dataUrl = Information.WorkPath.Enter("package").Enter(packageName + ".zip").Path;
                         break;
                     case RemoteFileType.PackageInfo:
-                        dataUrl = ConsoleAssistance.WorkPath + @"dependency\" + packageName + ".json";
+                        dataUrl = Information.WorkPath.Enter("dependency").Enter(packageName + ".json").Path;
                         break;
                     case RemoteFileType.PackageDatabase:
-                        dataUrl = ConsoleAssistance.WorkPath + @"package.db";
+                        dataUrl = Information.WorkPath.Enter("package.db").Path;
                         break;
                     default:
                         goto end;

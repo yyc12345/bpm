@@ -11,11 +11,11 @@ namespace BPMServer {
     public static class Config {
 
         public static Dictionary<string, string> Read() {
-            if (!File.Exists(Environment.CurrentDirectory + "\\config.cfg"))
+            if (!File.Exists(Information.WorkPath.Enter("config.cfg").Path))
                 Init();
 
             Dictionary<string, string> data;
-            using (StreamReader fs = new StreamReader(Environment.CurrentDirectory + "\\config.cfg", Encoding.UTF8)) {
+            using (StreamReader fs = new StreamReader(Information.WorkPath.Enter("config.cfg").Path, Encoding.UTF8)) {
                 data = JsonConvert.DeserializeObject<Dictionary<string, string>>(fs.ReadToEnd());
                 fs.Close();
             }
@@ -23,7 +23,7 @@ namespace BPMServer {
         }
 
         static void Init() {
-            using (StreamWriter fs = new StreamWriter(Environment.CurrentDirectory + "\\config.cfg", false, Encoding.UTF8)) {
+            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter("config.cfg").Path, false, Encoding.UTF8)) {
                 var cache = new Dictionary<string, string>() {
                     {"IPv4Port" , "3850" },
                     {"IPv6Port" , "3851" }
@@ -53,7 +53,7 @@ namespace BPMServer {
         }
 
         public static void Save(Dictionary<string, string> config) {
-            using (StreamWriter fs = new StreamWriter(Environment.CurrentDirectory + "\\config.cfg", false, Encoding.UTF8)) {
+            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter("config.cfg").Path, false, Encoding.UTF8)) {
                 fs.Write(JsonConvert.SerializeObject(config));
                 fs.Close();
             }
