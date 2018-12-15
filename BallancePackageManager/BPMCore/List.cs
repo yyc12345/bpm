@@ -10,14 +10,14 @@ using ShareLib;
 namespace BallancePackageManager.BPMCore {
     public static class List {
         public static void Core() {
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
 
-            var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
+            var packageDbConn = new Database();
             packageDbConn.Open();
 
             int count = installFolder.GetDirectories().Count();
@@ -28,10 +28,10 @@ namespace BallancePackageManager.BPMCore {
                 Console.Write($"{item.Name}");
 
                 //check update and output type
-                var cursor = new SQLiteCommand($"select * from package where name == \"{item.Name.Split('@')[0]}\"", packageDbConn);
-                var reader = cursor.ExecuteReader();
-                reader.Read();
-                Console.Write(" [" + I18N.Core($"PackageType_{((PackageType)int.Parse(reader["type"].ToString())).ToString()}") + "]");
+                var reader = (from item2 in packageDbConn.CoreDbContext.package
+                              where item2.name == item.Name.Split('@', StringSplitOptions.None)[0]
+                              select item2).ToList();
+                Console.Write(" [" + I18N.Core($"PackageType_{((PackageType)reader[0].type).ToString()}") + "]");
                 //if (reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
                 //    ConsoleAssistance.Write($" [{I18N.Core("List_Upgradable")}]", ConsoleColor.Yellow);
                 //    upgradableCount++;

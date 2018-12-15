@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,13 +11,33 @@ namespace BallancePackageManager.BPMCore {
     public static class Show {
         public static void Core(string packageName) {
 
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
             if (!packageName.Contains("@")) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_SpecificVersion"), ConsoleColor.Red);
+                return;
+            }
+
+            //read database
+            var packageDbConn = new Database();
+            packageDbConn.Open();
+
+            var reader = (from item in packageDbConn.CoreDbContext.package
+                          where item.name == packageName.Split("@", StringSplitOptions.None)[0]
+                          select item).ToList();
+            //detect existing
+            if (!reader.Any()) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
+                packageDbConn.Close();
+                return;
+            }
+            //detect version
+            if (!reader[0].version.Split('@').Contains(packageName.Split("@")[1])) {
+                ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
+                packageDbConn.Close();
                 return;
             }
 
@@ -30,26 +49,20 @@ namespace BallancePackageManager.BPMCore {
                 return;
             }
 
-            var fs = new StreamReader(ConsoleAssistance.WorkPath + @"cache\dependency\" + packageName + ".json", Encoding.UTF8);
-            var cache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
-            fs.Close();
-            fs.Dispose();
-
             ConsoleAssistance.WriteLine(packageName, ConsoleColor.Green);
             Console.WriteLine("");
 
-            //read database
-            var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
-            packageDbConn.Open();
-
-            var cursor = new SQLiteCommand($"select * from package where name == \"{packageName.Split('@')[0]}\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            reader.Read();
-            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Aka")}{reader["aka"].ToString()}", ConsoleColor.Yellow);
-            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Type")}{((PackageType)int.Parse(reader["type"].ToString())).ToString()}", ConsoleColor.Yellow);
-            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Desc")}{reader["desc"].ToString()}", ConsoleColor.Yellow);
+            //databse data
+            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Aka")}{reader[0].aka}", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Type")}{((PackageType)reader[0].type).ToString()}", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Desc")}{reader[0].desc}", ConsoleColor.Yellow);
 
             packageDbConn.Close();
+
+            var fs = new StreamReader(Information.WorkPath.Enter("cache").Enter("dependency").Enter(packageName + ".json").Path, Encoding.UTF8);
+            var cache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
+            fs.Close();
+            fs.Dispose();
 
             Console.WriteLine("");
             //output json

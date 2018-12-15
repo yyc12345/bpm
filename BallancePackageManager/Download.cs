@@ -22,16 +22,16 @@ namespace BallancePackageManager {
             string localFile = "";
             switch (remoteFileType) {
                 case RemoteFileType.Package:
-                    localFile = ConsoleAssistance.WorkPath + @"cache\download\" + remoteFile + ".zip";
+                    localFile = Information.WorkPath.Enter("cache").Enter("download").Enter(remoteFile + ".zip").Path;
                     break;
                 case RemoteFileType.PackageInfo:
-                    localFile = ConsoleAssistance.WorkPath + @"cache\dependency\" + remoteFile + ".json";
+                    localFile = Information.WorkPath.Enter("cache").Enter("dependency").Enter(remoteFile + ".json").Path;
                     break;
                 case RemoteFileType.PackageDatabase:
-                    localFile = ConsoleAssistance.WorkPath + @"package.db";
+                    localFile = Information.WorkPath.Enter("package.db").Path;
                     break;
                 default:
-                    localFile = ConsoleAssistance.WorkPath + @"package.db";
+                    localFile = Information.WorkPath.Enter("package.db").Path;
                     break;
             }
 

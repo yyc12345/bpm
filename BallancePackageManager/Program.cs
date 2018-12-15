@@ -60,14 +60,14 @@ namespace BallancePackageManager {
             */
 
             //detect local cache folder
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"cache\download"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\download");
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"cache\installed"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\installed");
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"cache\decompress"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\decompress");
-            if (!Directory.Exists(ConsoleAssistance.WorkPath + @"cache\dependency"))
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\dependency");
+            if (!Directory.Exists(Information.WorkPath.Enter("cache").Enter("download").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("cache").Enter("download").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("cache").Enter("installed").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("cache").Enter("installed").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("cache").Enter("decompress").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("cache").Enter("decompress").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("cache").Enter("dependency").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("cache").Enter("dependency").Path);
 
             //init i18n
             I18N.Init(BPMCore.Config.Read()["Language"]);

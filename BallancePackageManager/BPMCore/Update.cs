@@ -15,16 +15,16 @@ namespace BallancePackageManager.BPMCore {
             var host = string.Join(":", config, 0, config.Length - 2);
 
             //backup old database
-            File.Move(ConsoleAssistance.WorkPath + @"package.db", ConsoleAssistance.WorkPath + @"package.db.old");
+            File.Move(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("package.db.old").Path);
             var res = Download.DownloadDatabase();
             Console.WriteLine(Download.JudgeDownloadResult(res));
 
             if (res == Download.DownloadResult.OK) {
-                File.Delete(ConsoleAssistance.WorkPath + @"package.db.old");
+                File.Delete(Information.WorkPath.Enter("package.db.old").Path);
                 Console.WriteLine(I18N.Core("Update_Success"));
             } else {
-                //File.Delete(ConsoleAssistance.WorkPath + @"package.db");
-                File.Move(ConsoleAssistance.WorkPath + @"package.db.old", ConsoleAssistance.WorkPath + @"package.db");
+                //File.Delete(Information.WorkPath.Enter("package.db.old").Path);
+                File.Move(Information.WorkPath.Enter("package.db.old").Path, Information.WorkPath.Enter("package.db").Path);
                 Console.WriteLine(I18N.Core("Update_Fail"));
             }
                 

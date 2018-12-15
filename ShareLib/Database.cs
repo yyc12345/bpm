@@ -33,7 +33,7 @@ namespace ShareLib {
         public DbSet<DatabaseItem> package { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseSqlite($"Data Source = {Information.WorkPath.Enter("server.db").Path};");
+            optionsBuilder.UseSqlite($"Data Source = {Information.WorkPath.Enter("package.db").Path};");
         }
     }
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BallancePackageManager.BPMCore;
-using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Utils;
+//using IronPython.Hosting;
+//using Microsoft.Scripting.Hosting;
+//using Microsoft.Scripting.Utils;
 using System.IO;
 using ShareLib;
 
@@ -22,6 +22,7 @@ namespace BallancePackageManager {
                 invokePath += "\\";
             }
 
+            /*
             var file = folder.GetFiles("setup-*.*");
             if (!file.Any()) return (false, I18N.Core("ScriptInvoker_NoScriptFile"));
             for (int i = 1; i <= file.Count(); i++) {
@@ -37,10 +38,12 @@ namespace BallancePackageManager {
                 }
                 if (!result.status) return result;
             }
+            */
 
             return (true, "");
         }
 
+        /*
         static (bool status, string desc) PythonInvoker(string file, InvokeMethod method, string game_path, string current_folder, string parameter) {
             try {
                 ScriptEngine pyEngine = Python.CreateEngine();
@@ -65,6 +68,7 @@ namespace BallancePackageManager {
             }
 
         }
+        */
 
         public enum InvokeMethod {
             Install,

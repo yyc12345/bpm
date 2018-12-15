@@ -4,37 +4,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Data.SQLite;
+using System.Text.RegularExpressions;
 using ShareLib;
 
 namespace BallancePackageManager.BPMCore {
     public static class Search {
 
         public static void Core(string packageName) {
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
-            var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
+            var packageDbConn = new Database();
             packageDbConn.Open();
 
-            var cursor = new SQLiteCommand($"select * from package where name like \"%{packageName}%\" or aka like \"%{packageName}%\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            var folder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"cache\installed");
-            int count = 0;
-            while (reader.Read()) {
-                ConsoleAssistance.Write(reader["name"].ToString(), ConsoleColor.Green);
-                Console.Write(" @ " + reader["version"].ToString());
+            var rgx = new Regex($@"(\w|\W){packageName}(\w|\W)");
+            var reader = (from item in packageDbConn.CoreDbContext.package
+                          where rgx.IsMatch(item.name) || rgx.IsMatch(item.aka)
+                          select item).ToList();
+            var folder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
 
-                var detectFiles = folder.GetDirectories($"{reader["name"].ToString()}@");
+            foreach (var i in reader) {
+                ConsoleAssistance.Write(i.name, ConsoleColor.Green);
+                Console.Write(" @ " + i.version);
+
+                var detectFiles = folder.GetDirectories($"{i.name}@");
                 ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{I18N.Core("Search_InstalledVersion", detectFiles.Count().ToString())}]", ConsoleColor.Yellow);
 
-                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{reader["aka"].ToString()}\n{I18N.Core("Search&Show_Type")}{((PackageType)int.Parse(reader["type"].ToString())).ToString()}\n{I18N.Core("Search&Show_Desc")}{reader["desc"].ToString()}\n\n");
-                count++;
+                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{i.aka}\n{I18N.Core("Search&Show_Type")}{((PackageType)i.type).ToString()}\n{I18N.Core("Search&Show_Desc")}{i.desc}\n\n");
             }
 
-            ConsoleAssistance.WriteLine($"Total {count} matched packages", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine(I18N.Core("Search_Count", reader.Count.ToString()), ConsoleColor.Yellow);
 
             packageDbConn.Close();
 
