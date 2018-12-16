@@ -10,13 +10,13 @@ namespace BallancePackageManager.BPMCore {
     public static class Remove {
 
         public static void Core(string packageName) {
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
             //get info
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
 
             DirectoryInfo[] directoryList;
             if (packageName.Contains("@")) directoryList = installFolder.GetDirectories($"{packageName}");
@@ -52,13 +52,13 @@ namespace BallancePackageManager.BPMCore {
         public static bool RealRemove(List<string> packageList) {
             foreach (var item in packageList) {
                 Console.WriteLine(I18N.Core("Remove_Removing", item));
-                var res = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, ScriptInvoker.InvokeMethod.Remove, "");
+                var res = ScriptInvoker.Core(Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, ScriptInvoker.InvokeMethod.Remove, "");
                 if (res.status) {
                     ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     ConsoleAssistance.WriteLine(res.desc, ConsoleColor.Red);
                     return false;
                 }
-                Directory.Delete(ConsoleAssistance.WorkPath + @"\cache\installed\" + item, true);
+                Directory.Delete(Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, true);
 
                 Console.WriteLine(I18N.Core("Remove_Success", item));
             }

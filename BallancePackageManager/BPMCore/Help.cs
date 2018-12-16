@@ -10,21 +10,20 @@ namespace BallancePackageManager.BPMCore {
     public static class Help {
 
         public static void Core(string packageName, string parameter) {
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
 
-            //get info
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
-
-            DirectoryInfo[] directoryList;
-            if (packageName.Contains("@")) directoryList = installFolder.GetDirectories($"{packageName}");
-            else {
+            if (!packageName.Contains("@")) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_SpecificVersion"), ConsoleColor.Red);
                 return;
             }
 
+            //get info
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
+
+            var directoryList = installFolder.GetDirectories($"{packageName}");
             if (directoryList.Count() == 0) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
                 return;

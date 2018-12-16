@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ namespace BallancePackageManager.BPMCore {
     public static class Install {
 
         public static void Core(string packageName) {
-            if (!File.Exists(ConsoleAssistance.WorkPath + "package.db")) {
+            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
             }
@@ -22,19 +21,20 @@ namespace BallancePackageManager.BPMCore {
 
             //=================================================================pre-process
             //name is legal
-            var packageDbConn = new SQLiteConnection($"Data Source = {ConsoleAssistance.WorkPath}package.db; Version = 3;");
+            var packageDbConn = new Database();
             packageDbConn.Open();
 
-            var cursor = new SQLiteCommand($"select * from package where name == \"{(packageName.Contains("@") ? packageName.Split('@')[0] : packageName)}\"", packageDbConn);
-            var reader = cursor.ExecuteReader();
-            if (!reader.Read()) {
+            var reader = (from _i in packageDbConn.CoreDbContext.package
+                          where _i.name == (packageName.Contains("@") ? packageName.Split('@', StringSplitOptions.None)[0] : packageName)
+                          select _i).ToList();
+            if (!reader.Any()) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoMatchedPackage"), ConsoleColor.Red);
                 return;
             }
             packageName = GetVersionNatrually(packageName, packageDbConn);
 
             //is installed ?
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
             if (installFolder.GetDirectories($"{packageName}").Any()) {
                 ConsoleAssistance.WriteLine(I18N.Core("Install_InstalledPackage"), ConsoleColor.Red);
                 return;
@@ -125,16 +125,16 @@ namespace BallancePackageManager.BPMCore {
                 }
 
                 //remove decompress folder
-                Directory.Delete(ConsoleAssistance.WorkPath + @"cache\decompress", true);
-                Directory.CreateDirectory(ConsoleAssistance.WorkPath + @"cache\decompress");
+                Directory.Delete(Information.WorkPath.Enter("cache").Enter("decompress").Path, true);
+                Directory.CreateDirectory(Information.WorkPath.Enter("cache").Enter("decompress").Path);
 
                 //decompress
                 Console.WriteLine(I18N.Core("Install_ExtractItem", item));
 
-                zipExtractor.ExtractZip(ConsoleAssistance.WorkPath + @"cache\download\" + item + ".zip", ConsoleAssistance.WorkPath + @"cache\decompress", "");
+                zipExtractor.ExtractZip(Information.WorkPath.Enter("cache").Enter("download").Enter(item + ".zip").Path, Information.WorkPath.Enter("cache").Enter("decompress").Path, "");
 
                 Console.WriteLine(I18N.Core("Install_RunScriptItem", item));
-                var cacheRes = ScriptInvoker.Core(ConsoleAssistance.WorkPath + @"cache\decompress", ScriptInvoker.InvokeMethod.Install, "");
+                var cacheRes = ScriptInvoker.Core(Information.WorkPath.Enter("cache").Enter("decompress").Path, ScriptInvoker.InvokeMethod.Install, "");
                 if (cacheRes.status) {
                     ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     ConsoleAssistance.WriteLine(cacheRes.desc, ConsoleColor.Red);
@@ -142,7 +142,7 @@ namespace BallancePackageManager.BPMCore {
                 }
 
                 Console.WriteLine(I18N.Core("Install_RecordItem", item));
-                PackageAssistance.DirectoryCopy(ConsoleAssistance.WorkPath + @"cache\decompress", ConsoleAssistance.WorkPath + @"cache\installed\" + item, true);
+                PackageAssistance.DirectoryCopy(Information.WorkPath.Enter("cache").Enter("decompress").Path, Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, true);
 
                 Console.WriteLine(I18N.Core("Install_Success", item));
 
@@ -152,36 +152,36 @@ namespace BallancePackageManager.BPMCore {
 
         }
 
-        static string GetVersionNatrually(string packageName, SQLiteConnection sql) {
+        static string GetVersionNatrually(string packageName, Database sql) {
             if (packageName.Contains("@")) return packageName;
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
             var cache = installFolder.GetDirectories($"{packageName}@*");
             if (!cache.Any()) return GetTopVersion(packageName, sql);
             else return cache[0].Name;
 
         }
 
-        static string GetTopVersion(string packageNameWithoutVersion, SQLiteConnection sql) {
+        static string GetTopVersion(string packageNameWithoutVersion, Database sql) {
             if (packageNameWithoutVersion.Contains("@")) return packageNameWithoutVersion;
-            var cursor = new SQLiteCommand($"select * from package where name == \"{packageNameWithoutVersion}\"", sql);
-            var reader = cursor.ExecuteReader();
-            reader.Read();
-            return packageNameWithoutVersion + "@" + reader["version"].ToString().Split(',').Last();
+            var reader = (from _i in sql.CoreDbContext.package
+                          where _i.name == packageNameWithoutVersion
+                          select _i).ToList();
+            return packageNameWithoutVersion + "@" + reader[0].version.Split(',').Last();
         }
 
-        static List<string> GetAllVersion(string packageName, SQLiteConnection sql) {
+        static List<string> GetAllVersion(string packageName, Database sql) {
             if (packageName.Contains("@")) return new List<string>() { packageName };
-            var cursor = new SQLiteCommand($"select * from package where name == \"{packageName}\"", sql);
-            var reader = cursor.ExecuteReader();
-            reader.Read();
+            var reader = (from _i in sql.CoreDbContext.package
+                          where _i.name == packageName
+                          select _i).ToList();
             var res = new List<string>();
-            foreach (var item in reader["version"].ToString().Split(',')) {
+            foreach (var item in reader[0].version.Split(',')) {
                 res.Add($"{packageName}@{item}");
             }
             return res;
         }
 
-        static (bool res, Dictionary<string, PackageJson> topologyMap) GetPackageInfo(string corePackage, SQLiteConnection sql) {
+        static (bool res, Dictionary<string, PackageJson> topologyMap) GetPackageInfo(string corePackage, Database sql) {
 
             Download.DownloadResult res;
             //corePackage = GetTopVersion(corePackage, sql);
@@ -199,7 +199,7 @@ namespace BallancePackageManager.BPMCore {
                     if (res != Download.DownloadResult.OK && res != Download.DownloadResult.ExistedLocalFile)
                         return (false, null);
 
-                    var fs = new StreamReader(ConsoleAssistance.WorkPath + @"cache\dependency\" + item + ".json", Encoding.UTF8);
+                    var fs = new StreamReader(Information.WorkPath.Enter("cache").Enter("dependency").Enter(item + ".json").Path, Encoding.UTF8);
                     var cache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
                     fs.Close();
                     fs.Dispose();
@@ -219,7 +219,7 @@ namespace BallancePackageManager.BPMCore {
             return (true, result);
         }
 
-        static (bool status, List<string> res) DetectConflict(Dictionary<string, PackageJson> packageList, SQLiteConnection sql) {
+        static (bool status, List<string> res) DetectConflict(Dictionary<string, PackageJson> packageList, Database sql) {
 
             //detect themselves=================================================
             var self = packageList.Keys.ToList();
@@ -244,7 +244,7 @@ namespace BallancePackageManager.BPMCore {
             //detect installed package=========================================
             //get installed package list
             var installed = new List<string>();
-            var installFolder = new DirectoryInfo(ConsoleAssistance.WorkPath + @"\cache\installed");
+            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
             foreach (var item in installFolder.GetDirectories()) {
                 installed.Add(item.Name);
             }
@@ -258,7 +258,7 @@ namespace BallancePackageManager.BPMCore {
             var realRes = new HashSet<string>(res);
             foreach (var item in installed) {
                 PackageJson jsonCache;
-                using (var fs = new StreamReader(ConsoleAssistance.WorkPath + @"\cache\dependency\" + item + ".json", Encoding.UTF8)) {
+                using (var fs = new StreamReader(Information.WorkPath.Enter("cache").Enter("dependency").Enter(item + ".json").Path, Encoding.UTF8)) {
                     jsonCache = JsonConvert.DeserializeObject<PackageJson>(fs.ReadToEnd());
                     fs.Close();
                 }
