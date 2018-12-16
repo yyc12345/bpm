@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BallancePackageManager.BPMCore;
-//using IronPython.Hosting;
-//using Microsoft.Scripting.Hosting;
-//using Microsoft.Scripting.Utils;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using System.Runtime.Loader;
+using System.Reflection;
 using System.IO;
 using ShareLib;
 
@@ -17,49 +18,79 @@ namespace BallancePackageManager {
             var gamePath = Config.Read()["GamePath"];
             var folder = new DirectoryInfo(invokePath);
 
-            //correct slash error
-            if (invokePath[invokePath.Count()-1] != '\\') {
-                invokePath += "\\";
+
+            var file = folder.GetFiles("setup.cs");
+            if (!file.Any()) return (false, I18N.Core("ScriptInvoker_NoScriptFile"));
+
+            var file2 = folder.GetFiles("setup.dll");
+            if (!file2.Any()) {
+                //try compile
+                var test = CompileScript(file[0].FullName, file2[0].FullName);
+                if (!test.status) return (false, I18N.Core("ScriptInvoker_CompileError", test.desc)); //todo: translation
             }
 
-            /*
-            var file = folder.GetFiles("setup-*.*");
-            if (!file.Any()) return (false, I18N.Core("ScriptInvoker_NoScriptFile"));
-            for (int i = 1; i <= file.Count(); i++) {
-                var cacheFile = folder.GetFiles($"setup-{i}.*")[0];
-                var cache = PackageAssistance.GetScriptInfo(cacheFile.Name);
-                (bool status, string desc) result;
-                switch (cache.suffix) {
-                    case ".py":
-                        result = PythonInvoker(cacheFile.FullName, method, gamePath, invokePath, parameter);
-                        break;
-                    default:
-                        return (false, I18N.Core("ScriptInvoker_UnsupportedScript"));
+            return RealInvoker(file2[0].FullName, method, gamePath, invokePath, parameter);
+        }
+
+        static (bool status, string desc) CompileScript(string origin, string target) {
+            try {
+                //read code
+                var fs = new StreamReader(origin, Encoding.UTF8);
+                var user_code = fs.ReadToEnd();
+                fs.Close();
+                fs.Dispose();
+                string code = $@"
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+public static class Plugin
+{{
+    {user_code}
+}}
+";
+
+                //compile
+                var compiler = CSharpCompilation.Create("a")
+               .WithOptions(new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
+               .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
+               .AddReferences(MetadataReference.CreateFromFile(typeof(Console).GetTypeInfo().Assembly.Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.IO")).Location))
+               //.AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Text")).Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq")).Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Collections")).Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.ValueTuple")).Location))
+               .AddSyntaxTrees(CSharpSyntaxTree.ParseText(code));
+
+                var res = compiler.Emit(target);
+
+                if (!res.Success) {
+                    string r = "";
+                    foreach(var item in res.Diagnostics) {
+                        r += item.ToString() + "\n";
+                    }
+                    return (false, r);
                 }
-                if (!result.status) return result;
+            } catch (Exception e) {
+                return (false, e.Message);
             }
-            */
 
             return (true, "");
         }
 
-        /*
-        static (bool status, string desc) PythonInvoker(string file, InvokeMethod method, string game_path, string current_folder, string parameter) {
+        static (bool status, string desc) RealInvoker(string file, InvokeMethod method, string game_path, string current_folder, string parameter) {
             try {
-                ScriptEngine pyEngine = Python.CreateEngine();
-                dynamic dd = pyEngine.ExecuteFile(file);
+                var engine = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
                 switch (method) {
                     case InvokeMethod.Install:
-                        var cache1 = dd.install(game_path, current_folder);
-                        return ((bool)cache1[0], (string)cache1[1]);
+                        return ((bool status, string desc))(engine.GetType("Plugin").GetMethod("Install").Invoke(null, new object[] { game_path, current_folder }));
                     case InvokeMethod.Deploy:
-                        var cache2 = dd.deploy(game_path, current_folder, parameter);
-                        return ((bool)cache2[0], (string)cache2[1]);
+                        return ((bool status, string desc))(engine.GetType("Plugin").GetMethod("Deploy").Invoke(null, new object[] { game_path, current_folder, parameter }));
                     case InvokeMethod.Remove:
-                        var cache3 = dd.remove(game_path, current_folder);
-                        return ((bool)cache3[0], (string)cache3[1]);
+                        return ((bool status, string desc))(engine.GetType("Plugin").GetMethod("Remove").Invoke(null, new object[] { game_path, current_folder }));
                     case InvokeMethod.Help:
-                        return (true, (string)dd.help());
+                        return (true, (string)(engine.GetType("Plugin").GetMethod("Help").Invoke(null, null)));
                     default:
                         return (false, I18N.Core("ScriptInvoker_NoMethod"));
                 }
@@ -68,7 +99,6 @@ namespace BallancePackageManager {
             }
 
         }
-        */
 
         public enum InvokeMethod {
             Install,

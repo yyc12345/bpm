@@ -20,16 +20,9 @@ namespace ShareLib {
                     }
                     break;
                 case PlatformID.Unix:
-                    bool isFirst = true;
                     foreach (var item in defaultPath.Split('/')) {
                         if (item != string.Empty)
                             pathStack.Push(item);
-                        else {
-                            if (isFirst) {
-                                pathStack.Push(item);
-                                isFirst = false;
-                            }
-                        }
                     }
                     break;
                 default:
@@ -47,10 +40,10 @@ namespace ShareLib {
         public void Backtracking(PlatformID os) {
             switch (os) {
                 case PlatformID.Win32NT:
-                    if (pathStack.Count <= 1) return;
+                    if (pathStack.Count <= 0) return;
                     break;
                 case PlatformID.Unix:
-                    if (pathStack.Count <= 1) return;
+                    if (pathStack.Count <= 0) return;
                     break;
                 default:
                     return;
@@ -92,9 +85,10 @@ namespace ShareLib {
 
                 switch (os) {
                     case PlatformID.Win32NT:
+                        if (pathStack.Count == 0) throw new InvalidOperationException("Path stack is empty. It is illegal for Windows.");
                         return string.Join(@"\", GetPathList());
                     case PlatformID.Unix:
-                        return string.Join(@"/", GetPathList());
+                        return "/" + string.Join(@"/", GetPathList());
                     default:
                         return "";
                 }

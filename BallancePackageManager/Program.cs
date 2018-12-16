@@ -75,7 +75,8 @@ namespace BallancePackageManager {
             var config = BPMCore.Config.Read();
             while (config["GamePath"] == "") {
                 Console.WriteLine(I18N.Core("Init_TypePath"));
-                config["GamePath"] = Console.ReadLine();
+                var cache = new FilePathBuilder(Console.ReadLine(), Information.OS);
+                config["GamePath"] = cache.Path;
             }
             BPMCore.Config.Save(config);
             
