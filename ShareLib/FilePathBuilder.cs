@@ -37,18 +37,8 @@ namespace ShareLib {
         /// <summary>
         /// Backtracking to previous path
         /// </summary>
-        public void Backtracking(PlatformID os) {
-            switch (os) {
-                case PlatformID.Win32NT:
-                    if (pathStack.Count <= 0) return;
-                    break;
-                case PlatformID.Unix:
-                    if (pathStack.Count <= 0) return;
-                    break;
-                default:
-                    return;
-            }
-
+        public void Backtracking() {
+            if (pathStack.Count <= 0) return;
             pathStack.Pop();
         }
 

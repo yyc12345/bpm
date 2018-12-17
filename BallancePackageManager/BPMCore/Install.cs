@@ -109,7 +109,7 @@ namespace BallancePackageManager.BPMCore {
             Remove.RealRemove(cache2.res);
 
             //install
-            Console.WriteLine(I18N.Core("Install_RemoveList"));
+            Console.WriteLine(I18N.Core("Install_InstallingSelectedPackage"));
 
             var zipExtractor = new FastZip();
 
@@ -135,7 +135,7 @@ namespace BallancePackageManager.BPMCore {
 
                 Console.WriteLine(I18N.Core("Install_RunScriptItem", item));
                 var cacheRes = ScriptInvoker.Core(Information.WorkPath.Enter("cache").Enter("decompress").Path, ScriptInvoker.InvokeMethod.Install, "");
-                if (cacheRes.status) {
+                if (!cacheRes.status) {
                     ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     ConsoleAssistance.WriteLine(cacheRes.desc, ConsoleColor.Red);
                     return;
@@ -193,7 +193,7 @@ namespace BallancePackageManager.BPMCore {
 
                 foreach (var item in nowList) {
                     //download
-                    Console.WriteLine($"Downloading {item}'s infomation...");
+                    Console.WriteLine(I18N.Core("Install_DownloadInfo", item));
                     res = Download.DownloadPackageInfo(item);
                     Console.WriteLine(Download.JudgeDownloadResult(res));
                     if (res != Download.DownloadResult.OK && res != Download.DownloadResult.ExistedLocalFile)

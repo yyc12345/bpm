@@ -15,7 +15,8 @@ namespace BallancePackageManager.BPMCore {
             var host = string.Join(":", config, 0, config.Length - 2);
 
             //backup old database
-            File.Move(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("package.db.old").Path);
+            if (File.Exists(Information.WorkPath.Enter("package.db").Path))
+                File.Move(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("package.db.old").Path);
             var res = Download.DownloadDatabase();
             Console.WriteLine(Download.JudgeDownloadResult(res));
 
@@ -24,10 +25,11 @@ namespace BallancePackageManager.BPMCore {
                 Console.WriteLine(I18N.Core("Update_Success"));
             } else {
                 //File.Delete(Information.WorkPath.Enter("package.db.old").Path);
-                File.Move(Information.WorkPath.Enter("package.db.old").Path, Information.WorkPath.Enter("package.db").Path);
+                if (File.Exists(Information.WorkPath.Enter("package.db.old").Path))
+                    File.Move(Information.WorkPath.Enter("package.db.old").Path, Information.WorkPath.Enter("package.db").Path);
                 Console.WriteLine(I18N.Core("Update_Fail"));
             }
-                
+
 
         }
 

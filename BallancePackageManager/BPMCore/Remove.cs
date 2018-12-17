@@ -53,7 +53,7 @@ namespace BallancePackageManager.BPMCore {
             foreach (var item in packageList) {
                 Console.WriteLine(I18N.Core("Remove_Removing", item));
                 var res = ScriptInvoker.Core(Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, ScriptInvoker.InvokeMethod.Remove, "");
-                if (res.status) {
+                if (!res.status) {
                     ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     ConsoleAssistance.WriteLine(res.desc, ConsoleColor.Red);
                     return false;

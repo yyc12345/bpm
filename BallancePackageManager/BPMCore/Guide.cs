@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BallancePackageManager.BPMCore {
-    public static class Help {
+    public static class Guide {
 
-        public static void Core(string packageName, string parameter) {
+        public static void Core(string packageName) {
             if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
                 return;
@@ -31,15 +31,14 @@ namespace BallancePackageManager.BPMCore {
 
             var finalFolder = directoryList[0];
             var res = ScriptInvoker.Core(finalFolder.FullName, ScriptInvoker.InvokeMethod.Help, "");
-            if (res.status) {
+            if (!res.status) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                 ConsoleAssistance.WriteLine(res.desc, ConsoleColor.Red);
                 return;
             }
             if (res.desc == "") ConsoleAssistance.WriteLine(I18N.Core("Help_NoHelp"), ConsoleColor.Yellow);
             else Console.WriteLine(res.desc);
-
-            ConsoleAssistance.WriteLine(I18N.Core("General_AllOperationDown"), ConsoleColor.Yellow);
+            
         }
 
 

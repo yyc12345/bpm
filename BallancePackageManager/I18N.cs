@@ -56,6 +56,8 @@ namespace BallancePackageManager {
             {"Help_10", "  deploy - deploy package (especially for map and resources)"},
             {"Help_11", "  config - edit the config"},
             {"Help_12", "Glory to BKT."},
+            {"Help_13", "  guide - show specific package's help"},
+            {"Help_14", "  help - print this help"},
 
             //config
             {"Config_InvalidConfig", "Invalid config"},
@@ -71,6 +73,7 @@ namespace BallancePackageManager {
 
             {"Install_InstalledPackage", "Package is installed"},
             {"Install_SelfConflict", "The package, which you want to install, is self-conflict"},
+            {"Install_DownloadInfo", "Downloading {0}'s infomation..."},
             {"Install_CloseLoop", "Closed-loop package dependency"},
             {"Install_InstallList", "There are the packages which will be installed: "},
             {"Install_RemoveList", "There are the packages which will be removed due to the conflict: "},
@@ -171,6 +174,8 @@ namespace BallancePackageManager {
             {"Help_10", "  deploy - 部署包（尤其对地图以及资源而言）"},
             {"Help_11", "  config - 编辑设置"},
             {"Help_12", "荣耀属于 BKT"},
+            {"Help_13", "  guide - 显示指定包的帮助信息"},
+            {"Help_14", "  help - 显示这段帮助信息"},
 
             //config
             {"Config_InvalidConfig", "无效的设置"},
@@ -186,6 +191,7 @@ namespace BallancePackageManager {
 
             {"Install_InstalledPackage", "包已被安装"},
             {"Install_SelfConflict", "您想要安装的包是自我冲突的"},
+            {"Install_DownloadInfo", "下载 {0} 的信息..."},
             {"Install_CloseLoop", "包存在闭环依赖"},
             {"Install_InstallList", "这些包将会被安装："},
             {"Install_RemoveList", "这些包将会因为冲突而被移除："},

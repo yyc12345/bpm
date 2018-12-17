@@ -18,18 +18,22 @@ namespace BallancePackageManager {
             var gamePath = Config.Read()["GamePath"];
             var folder = new DirectoryInfo(invokePath);
 
+            var folder_build = new FilePathBuilder(invokePath, Information.OS);
+            folder_build.Enter("setup.cs");
+            var script_file = folder_build.Path;
+            folder_build.Backtracking();
+            folder_build.Enter("setup.dll");
+            var dll_file = folder_build.Path;
 
-            var file = folder.GetFiles("setup.cs");
-            if (!file.Any()) return (false, I18N.Core("ScriptInvoker_NoScriptFile"));
+            if (!File.Exists(script_file)) return (false, I18N.Core("ScriptInvoker_NoScriptFile"));
 
-            var file2 = folder.GetFiles("setup.dll");
-            if (!file2.Any()) {
+            if (!File.Exists(dll_file)) {
                 //try compile
-                var test = CompileScript(file[0].FullName, file2[0].FullName);
+                var test = CompileScript(script_file, dll_file);
                 if (!test.status) return (false, I18N.Core("ScriptInvoker_CompileError", test.desc)); //todo: translation
             }
 
-            return RealInvoker(file2[0].FullName, method, gamePath, invokePath, parameter);
+            return RealInvoker(dll_file, method, gamePath, invokePath, parameter);
         }
 
         static (bool status, string desc) CompileScript(string origin, string target) {
@@ -51,7 +55,7 @@ public static class Plugin
 ";
 
                 //compile
-                var compiler = CSharpCompilation.Create("a")
+                var compiler = CSharpCompilation.Create("bpm_Plugin")
                .WithOptions(new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
                .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
                .AddReferences(MetadataReference.CreateFromFile(typeof(Console).GetTypeInfo().Assembly.Location))
@@ -81,7 +85,7 @@ public static class Plugin
 
         static (bool status, string desc) RealInvoker(string file, InvokeMethod method, string game_path, string current_folder, string parameter) {
             try {
-                var engine = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
+                var engine = Assembly.Load(File.ReadAllBytes(file));
                 switch (method) {
                     case InvokeMethod.Install:
                         return ((bool status, string desc))(engine.GetType("Plugin").GetMethod("Install").Invoke(null, new object[] { game_path, current_folder }));

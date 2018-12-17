@@ -31,7 +31,7 @@ namespace BallancePackageManager.BPMCore {
 
             var finalFolder = directoryList[0];
             var res = ScriptInvoker.Core(finalFolder.FullName, ScriptInvoker.InvokeMethod.Deploy, parameter);
-            if (res.status) {
+            if (!res.status) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                 ConsoleAssistance.WriteLine(res.desc, ConsoleColor.Red);
                 return;

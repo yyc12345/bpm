@@ -64,6 +64,10 @@ namespace BallancePackageManager {
                         if (param.Count != 2) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Deploy.Core(param[0], param[1]);
                         break;
+                    case "guide":
+                        if (param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Guide.Core(param[0]);
+                        break;
                     case "help":
                         OutputHelp();
                         break;
@@ -101,6 +105,8 @@ namespace BallancePackageManager {
             //Console.WriteLine("  full-upgrade - upgrade the system by removing/installing/upgrading packages");
             //Console.WriteLine("  restore - remove all installed package");
             Console.WriteLine(I18N.Core("Help_11"));
+            Console.WriteLine(I18N.Core("Help_13"));
+            Console.WriteLine(I18N.Core("Help_14"));
             //Console.WriteLine("  exit - exit bpm");
             Console.WriteLine("");
             Console.WriteLine(I18N.Core("Help_12"));

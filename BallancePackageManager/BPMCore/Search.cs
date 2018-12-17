@@ -19,7 +19,7 @@ namespace BallancePackageManager.BPMCore {
             var packageDbConn = new Database();
             packageDbConn.Open();
 
-            var rgx = new Regex($@"(\w|\W){packageName}(\w|\W)");
+            var rgx = new Regex($@"(\w*|\W*){packageName}(\w*|\W*)");
             var reader = (from item in packageDbConn.CoreDbContext.package
                           where rgx.IsMatch(item.name) || rgx.IsMatch(item.aka)
                           select item).ToList();
