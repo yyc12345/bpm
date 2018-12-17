@@ -144,7 +144,6 @@ namespace BallancePackageManager {
 
             //script invoker
             {"ScriptInvoker_NoScriptFile", "No script file"},
-            {"ScriptInvoker_UnsupportedScript", "Unsupported script file"},
             {"ScriptInvoker_NoMethod", "No matched method"},
             {"ScriptInvoker_InvokeError", "Invoke error"},
             {"ScriptInvoker_CompileError", "Compile error\nDetail:\n{0}"},
@@ -262,7 +261,6 @@ namespace BallancePackageManager {
 
             //script invoker
             {"ScriptInvoker_NoScriptFile", "没有脚本文件"},
-            {"ScriptInvoker_UnsupportedScript", "不支持的脚本文件"},
             {"ScriptInvoker_NoMethod", "没有匹配的函数"},
             {"ScriptInvoker_InvokeError", "调用错误"},
             {"ScriptInvoker_CompileError", "编译错误\n详情：\n{0}"},
