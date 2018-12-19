@@ -20,9 +20,11 @@ namespace BallancePackageManager.BPMCore {
             packageDbConn.Open();
 
             var rgx = new Regex($@"(\w*|\W*){packageName}(\w*|\W*)");
+            var bol = rgx.IsMatch(packageName);
             var reader = (from item in packageDbConn.CoreDbContext.package
-                          where rgx.IsMatch(item.name) || rgx.IsMatch(item.aka)
+                          where rgx.IsMatch(item.name) || (item.aka == null || item.aka == "") ? false : rgx.IsMatch(item.aka)
                           select item).ToList();
+
             var folder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
 
             foreach (var i in reader) {
