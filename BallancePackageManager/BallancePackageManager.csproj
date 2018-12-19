@@ -18,4 +18,13 @@
     <ProjectReference Include="..\ShareLib\ShareLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="bpm.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bpm.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
