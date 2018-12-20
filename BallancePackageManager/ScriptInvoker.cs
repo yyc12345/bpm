@@ -43,16 +43,12 @@ namespace BallancePackageManager {
                 var user_code = fs.ReadToEnd();
                 fs.Close();
                 fs.Dispose();
-                string code = $@"
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-public static class Plugin
-{{
-    {user_code}
-}}
-";
+
+                //read code body
+                var fs2 = new StreamReader(Information.WorkPath.Enter("ScriptCompile").Enter("ScriptBody.cs").Path, Encoding.UTF8);
+                var code = fs2.ReadToEnd().Replace("{PersonalCode}", user_code);
+                fs2.Close();
+                fs2.Dispose();
 
                 //compile
                 var compiler = CSharpCompilation.Create("bpm_Plugin")
@@ -65,8 +61,9 @@ public static class Plugin
                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq")).Location))
                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Collections")).Location))
                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.ValueTuple")).Location))
+               .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime.Extensions")).Location))
                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(code));
-
+                
                 var res = compiler.Emit(target);
 
                 if (!res.Success) {
