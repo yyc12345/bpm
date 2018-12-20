@@ -54,7 +54,7 @@ namespace BallancePackageManager.BPMCore {
 
             //databse data
             ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Aka")}{reader[0].aka}", ConsoleColor.Yellow);
-            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Type")}{((PackageType)reader[0].type).ToString()}", ConsoleColor.Yellow);
+            ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Type")}{I18N.Core($"PackageType_{((PackageType)reader[0].type).ToString()}")}", ConsoleColor.Yellow);
             ConsoleAssistance.WriteLine($"{I18N.Core("Search&Show_Desc")}{reader[0].desc}", ConsoleColor.Yellow);
 
             packageDbConn.Close();

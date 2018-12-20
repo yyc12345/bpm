@@ -27,9 +27,15 @@ namespace BallancePackageManager.BPMCore {
                 return;
             }
 
+            //sort remove package for ensure correctly remove
+            var recorder = new Record();
+            recorder.Init();
+            var realPackage = recorder.SortPackage((from i in directoryList select i.Name).ToList());
+            recorder.Save();
+
             ConsoleAssistance.WriteLine(I18N.Core("Remove_RemoveList"), ConsoleColor.Yellow);
-            foreach (var item in directoryList) {
-                Console.WriteLine($"{item.Name}");
+            foreach (var item in realPackage) {
+                Console.WriteLine($"{item}");
             }
 
             Console.WriteLine();
@@ -40,7 +46,7 @@ namespace BallancePackageManager.BPMCore {
             }
 
             //remove
-            var res = RealRemove((from i in directoryList select i.Name).ToList());
+            var res = RealRemove(realPackage);
             if (!res) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_OperationAborted"), ConsoleColor.Red);
                 return;
@@ -50,6 +56,10 @@ namespace BallancePackageManager.BPMCore {
         }
 
         public static bool RealRemove(List<string> packageList) {
+            //start recorder
+            var recorder = new Record();
+            recorder.Init();
+
             foreach (var item in packageList) {
                 Console.WriteLine(I18N.Core("Remove_Removing", item));
                 var res = ScriptInvoker.Core(Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, ScriptInvoker.InvokeMethod.Remove, "");
@@ -59,10 +69,12 @@ namespace BallancePackageManager.BPMCore {
                     return false;
                 }
                 Directory.Delete(Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, true);
+                recorder.Remove(item);
 
                 Console.WriteLine(I18N.Core("Remove_Success", item));
             }
 
+            recorder.Save();
             return true;
         }
 

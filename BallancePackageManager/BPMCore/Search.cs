@@ -19,10 +19,9 @@ namespace BallancePackageManager.BPMCore {
             var packageDbConn = new Database();
             packageDbConn.Open();
 
-            var rgx = new Regex($@"(\w*|\W*){packageName}(\w*|\W*)");
-            var bol = rgx.IsMatch(packageName);
+            var rgx = new Regex($@"(\w|\W)*{packageName}(\w|\W)*");
             var reader = (from item in packageDbConn.CoreDbContext.package
-                          where rgx.IsMatch(item.name) || (item.aka == null || item.aka == "") ? false : rgx.IsMatch(item.aka)
+                          where rgx.IsMatch(item.name) || ((item.aka == null || item.aka == "") ? false : rgx.IsMatch(item.aka))
                           select item).ToList();
 
             var folder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
@@ -34,7 +33,7 @@ namespace BallancePackageManager.BPMCore {
                 var detectFiles = folder.GetDirectories($"{i.name}@");
                 ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{I18N.Core("Search_InstalledVersion", detectFiles.Count().ToString())}]", ConsoleColor.Yellow);
 
-                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{i.aka}\n{I18N.Core("Search&Show_Type")}{((PackageType)i.type).ToString()}\n{I18N.Core("Search&Show_Desc")}{i.desc}\n\n");
+                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{i.aka}\n{I18N.Core("Search&Show_Type")}{I18N.Core($"PackageType_{((PackageType)reader[0].type).ToString()}")}\n{I18N.Core("Search&Show_Desc")}{i.desc}\n\n");
             }
 
             ConsoleAssistance.WriteLine(I18N.Core("Search_Count", reader.Count.ToString()), ConsoleColor.Yellow);

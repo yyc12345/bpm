@@ -76,12 +76,18 @@ namespace BallancePackageManager.BPMCore {
             //remove installed package
             var realPackage = new List<string>(cache3.res);
 
-            foreach (var item in installFolder.GetFiles($"*.json")) {
-                var cacheSplit = PackageAssistance.GetScriptInfo(item.Name);
-                realPackage.Remove($"{cacheSplit.packageName}@{cacheSplit.version}");
+            foreach (var item in installFolder.GetDirectories()) {
+                if (realPackage.Contains(item.Name))
+                    realPackage.Remove(item.Name);
             }
 
             packageDbConn.Close();
+
+            //sort removed package
+            var sort_recorder = new Record();
+            sort_recorder.Init();
+            var realRemovedPackage = sort_recorder.SortPackage(cache2.res);
+            sort_recorder.Save();
             //=======================================================================output
 
             ConsoleAssistance.WriteLine(I18N.Core("Install_InstallList"), ConsoleColor.Yellow);
@@ -91,8 +97,8 @@ namespace BallancePackageManager.BPMCore {
             Console.WriteLine("");
 
             ConsoleAssistance.WriteLine(I18N.Core("Install_RemoveList"), ConsoleColor.Yellow);
-            if (cache2.res.Count == 0) ConsoleAssistance.WriteLine(I18N.Core("General_None"), ConsoleColor.Yellow);
-            foreach (var item in cache2.res) {
+            if (realRemovedPackage.Count == 0) ConsoleAssistance.WriteLine(I18N.Core("General_None"), ConsoleColor.Yellow);
+            foreach (var item in realRemovedPackage) {
                 Console.WriteLine(item);
             }
             Console.WriteLine("");
@@ -106,10 +112,13 @@ namespace BallancePackageManager.BPMCore {
             //============================================================================install
             //remove
             Console.WriteLine(I18N.Core("Install_RemovingSelectedPackage"));
-            Remove.RealRemove(cache2.res);
+            Remove.RealRemove(realRemovedPackage);
 
             //install
             Console.WriteLine(I18N.Core("Install_InstallingSelectedPackage"));
+            //ready recorder
+            var recorder = new Record();
+            recorder.Init();
 
             var zipExtractor = new FastZip();
 
@@ -141,12 +150,17 @@ namespace BallancePackageManager.BPMCore {
                     return;
                 }
 
+                //record first and copy folders
                 Console.WriteLine(I18N.Core("Install_RecordItem", item));
+                recorder.Add(item);
                 PackageAssistance.DirectoryCopy(Information.WorkPath.Enter("cache").Enter("decompress").Path, Information.WorkPath.Enter("cache").Enter("installed").Enter(item).Path, true);
 
                 Console.WriteLine(I18N.Core("Install_Success", item));
 
             }
+
+            //close recorder
+            recorder.Save();
 
             ConsoleAssistance.WriteLine(I18N.Core("General_AllOperationDown"), ConsoleColor.Yellow);
 
