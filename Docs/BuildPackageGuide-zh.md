@@ -52,22 +52,15 @@
 
 ## 安装脚本
 
-### 多语言支持
-
-bpm脚本支持多语言，但就目前来说，只支持Python脚本。
-
-### 多脚本协同执行
-
-bpm支持多脚本协同运行，脚本文件的名称需要遵守这个命名规范：`setup-N.xxx` 其中xxx是你脚本的后缀名，如果是Python就是py，如果是lua脚本就是lua。而N指的是脚本的执行顺序，是一个从1开始取的正整数，如果你只需要一个脚本文件，那么直接命名成`setup-1.xxx`即可。但如果你需要多个脚本顺序执行，那么其余脚本的文件名，顺沿即可，例如：`setup-2.xxx`，`setup-3.xxx`，`setup-4.xxx`等等。bpm会按照数字的顺序依次执行每个脚本中脚本中的函数，比如对于config命令，bpm会从setup-1开始执行其中的config函数，然后是setup-2，以此类推。
-
+bpm 脚本使用C\#作为脚本语言，使用 Roslyn 编译脚本并执行。您必须按照 Blank.cs 的格式来书写相关代码。事实上，您所书写的代码，最终都会被附加到此项目的`ScriptBody.cs`中然后进行编译，如果想要了解您到底可以使用哪些函数与库，您可以参阅`ScriptBody.cs`
 
 ### 脚本函数简介与参数解析
 
-Python安装脚本共有4个函数，分别是install，check，deploy，remove。分别对应安装，检测完整性，部署，移除。
+安装脚本共有4个函数，分别是Install，Deploy，Remove和Help。分别对应安装，部署，移除，帮助。
 
 通用参数`game_path`和`current_path`分别代表游戏目录与当前脚本的执行目录（存放有相关资源文件）
 
-由于设计上的智障，目前来说，`game_path`的最后一位是带slash的，而`current_path`是不带slash的，以后版本或许会加以改进，但是在project-z23及其之前的版本都是此种类型的参数
+`game_path`和`current_path`的最后字符都是是不带slash的（project-z23及其之前的版本的参数类型与此不同，不过关系不大，不影响）
 
 ## 脚本建议
 
