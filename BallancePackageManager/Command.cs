@@ -23,22 +23,24 @@ namespace BallancePackageManager {
             void runCode() {
                 switch (head) {
                     case "update":
-                        Update.Core();
+                        if (param.Count() == 0) Update.Core();
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "search":
-                        if (param.Count() != 0)
-                            Search.Core(param[0]);
+                        if (param.Count() != 0) Search.Core(param);
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "install":
-                        if (param.Count() != 0)
-                            Install.Core(param[0]);
+                        if (param.Count() != 0) Install.Core(param[0]);
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "list":
-                        BallancePackageManager.BPMCore.List.Core();
+                        if (param.Count() == 0) BallancePackageManager.BPMCore.List.Core();
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "remove":
-                        if (param.Count() != 0)
-                            Remove.Core(param[0]);
+                        if (param.Count() != 0) Remove.Core(param[0]);
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "config":
                         switch (param.Count) {
@@ -57,8 +59,8 @@ namespace BallancePackageManager {
                         }
                         break;
                     case "show":
-                        if (param.Count != 0)
-                            Show.Core(param[0]);
+                        if (param.Count == 1) Show.Core(param[0]);
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "deploy":
                         if (param.Count != 2) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);

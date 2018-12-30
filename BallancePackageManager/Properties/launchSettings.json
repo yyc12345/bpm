@@ -2,7 +2,7 @@
   "profiles": {
     "BallancePackageManager": {
       "commandName": "Project",
-      "commandLineArgs": "install score_manager"
+      "commandLineArgs": "search ball loader jjy"
     }
   }
 }
