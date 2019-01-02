@@ -8,7 +8,15 @@ namespace ShareLib {
 
         private Stack<string> pathStack;
 
+        public FilePathBuilder(string defaultPath) {
+            this.stringInitialize(defaultPath, Information.OS);
+        }
+
         public FilePathBuilder(string defaultPath, PlatformID os) {
+            this.stringInitialize(defaultPath, os);
+        }
+
+        void stringInitialize(string defaultPath, PlatformID os) {
             pathStack = new Stack<string>();
 
             if (defaultPath == string.Empty) throw new ArgumentException();
@@ -85,10 +93,7 @@ namespace ShareLib {
             }
 
         }
-
-        public Stack<string> GeneralPath() {
-            return pathStack;
-        }
+        
     }
 
 }

@@ -3,9 +3,30 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 public static class Plugin {
     {PersonalCode}
+}
+
+public static class CommandHelper {
+    public static string RunCommand(string file, string argument, bool wait) {
+        var process = new Process() {
+            StartInfo = new ProcessStartInfo {
+                FileName = file,
+                Arguments = argument,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = false
+            }
+        };
+
+        process.Start();
+        var res = process.StandardOutput.ReadToEnd();
+        if (wait) process.WaitForExit();
+
+        return res;
+    }
 }
 
 public class Information {
@@ -25,7 +46,15 @@ public class FilePathBuilder {
 
     private Stack<string> pathStack;
 
+    public FilePathBuilder(string defaultPath) {
+        this.stringInitialize(defaultPath, Information.OS);
+    }
+
     public FilePathBuilder(string defaultPath, PlatformID os) {
+        this.stringInitialize(defaultPath, os);
+    }
+
+    void stringInitialize(string defaultPath, PlatformID os) {
         pathStack = new Stack<string>();
 
         if (defaultPath == string.Empty) throw new ArgumentException();
@@ -103,7 +132,4 @@ public class FilePathBuilder {
 
     }
 
-    public Stack<string> GeneralPath() {
-        return pathStack;
-    }
 }
