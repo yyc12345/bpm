@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace BallancePackageManager.ScriptPreCompile {
+namespace BallancePackageManager.ScriptPrecompile {
     public static class ScriptCommon {
         //============================================= assistant function
 

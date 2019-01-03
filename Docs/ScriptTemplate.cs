@@ -20,7 +20,7 @@ public static (bool status, string desc) Install(string gamePath, string current
     } 
     catch (Exception e)
     {
-        return (false, "Runtime error:\n" + e.Message);
+        return (false, "Runtime error:" + Environment.NewLine + e.Message);
     }
     return (true, "");
 }
@@ -33,7 +33,7 @@ public static (bool status, string desc) Remove(string gamePath, string currentP
     } 
     catch (Exception e)
     {
-        return (false, "Runtime error:\n" + e.Message);
+        return (false, "Runtime error:" + Environment.NewLine + e.Message);
     }
     return (true, "");
 }
@@ -46,7 +46,7 @@ public static (bool status, string desc) Deploy(string gamePath, string currentP
     } 
     catch (Exception e)
     {
-        return (false, "Runtime error:\n" + e.Message);
+        return (false, "Runtime error:" + Environment.NewLine + e.Message);
     }
     return (true, "");
 }
