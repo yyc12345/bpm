@@ -6,16 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ScriptBody.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="ScriptBody.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />

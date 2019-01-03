@@ -45,7 +45,7 @@ namespace BallancePackageManager {
                 fs.Dispose();
 
                 //read code body
-                var fs2 = new StreamReader(Information.WorkPath.Enter("ScriptCompile").Enter("ScriptBody.cs").Path, Encoding.UTF8);
+                var fs2 = new StreamReader(Information.WorkPath.Enter("ScriptBody.cs").Path, Encoding.UTF8);
                 var code = fs2.ReadToEnd().Replace("{PersonalCode}", user_code);
                 fs2.Close();
                 fs2.Dispose();
