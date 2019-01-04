@@ -11,9 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMServer", "BPMServer\BPMS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMSMaintenance", "BPMSMaintenance\BPMSMaintenance.csproj", "{64FC0B48-7126-4F98-BEB3-373D825814C1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMSDaemon", "BPMSDaemon\BPMSDaemon.csproj", "{CC0F4E5E-2EEB-4C97-80E1-C60597B3D77B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMScriptDebugger", "BPMScriptDebugger\BPMScriptDebugger.csproj", "{C12EAB8D-068D-4723-80D1-4A0E8FCD57CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMScriptDebugger", "BPMScriptDebugger\BPMScriptDebugger.csproj", "{C12EAB8D-068D-4723-80D1-4A0E8FCD57CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +35,6 @@ Global
 		{64FC0B48-7126-4F98-BEB3-373D825814C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64FC0B48-7126-4F98-BEB3-373D825814C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64FC0B48-7126-4F98-BEB3-373D825814C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC0F4E5E-2EEB-4C97-80E1-C60597B3D77B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC0F4E5E-2EEB-4C97-80E1-C60597B3D77B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC0F4E5E-2EEB-4C97-80E1-C60597B3D77B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC0F4E5E-2EEB-4C97-80E1-C60597B3D77B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C12EAB8D-068D-4723-80D1-4A0E8FCD57CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C12EAB8D-068D-4723-80D1-4A0E8FCD57CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C12EAB8D-068D-4723-80D1-4A0E8FCD57CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
