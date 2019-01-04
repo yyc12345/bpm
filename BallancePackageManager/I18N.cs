@@ -149,6 +149,8 @@ namespace BallancePackageManager {
             {"ScriptInvoker_NoMethod", "No matched method"},
             {"ScriptInvoker_InvokeError", "Invoke error"},
             {"ScriptInvoker_CompileError", "Compile error\nDetail:\n{0}"},
+            {"ScriptInvoker_IllegalInternalFlagFileContent", "Illegal internal flag file content"},
+            {"ScriptInvoker_UnsupportedInternalScript", "Internal script do not support this package type"},
 
             //help
             {"Help_NoHelp", "There are no help provided by package."}
@@ -268,6 +270,8 @@ namespace BallancePackageManager {
             {"ScriptInvoker_NoMethod", "没有匹配的函数"},
             {"ScriptInvoker_InvokeError", "调用错误"},
             {"ScriptInvoker_CompileError", "编译错误\n详情：\n{0}"},
+            {"ScriptInvoker_IllegalInternalFlagFileContent", "内部脚本标识文件的内容非法"},
+            {"ScriptInvoker_UnsupportedInternalScript", "内部脚本不支持这个包类型"},
 
             //help
             {"Help_NoHelp", "没有由包提供的帮助"}
