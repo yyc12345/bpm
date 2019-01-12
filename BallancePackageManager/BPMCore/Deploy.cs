@@ -10,11 +10,7 @@ namespace BallancePackageManager.BPMCore {
     public static class Deploy {
 
         public static void Core(string packageName, string parameter) {
-            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
-                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                return;
-            }
-
+            
             if (!packageName.Contains("@")) {
                 ConsoleAssistance.WriteLine(I18N.Core("General_SpecificVersion"), ConsoleColor.Red);
                 return;

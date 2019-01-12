@@ -133,6 +133,7 @@ namespace BallancePackageManager {
             {"General_NetworkError", "A network error occured."},
             {"General_OperationAborted", "Operation is aborted"},
             {"General_NoDatabase", "No package database. Please use *bpm update* to update your local package database."},
+            {"General_NoGamePath", "No usable GamePath. Please use *bpm config GamePath xxx* to set GamePath firstly."},
 
             //type
             {"PackageType_Mod", "Mod"},
@@ -254,6 +255,7 @@ namespace BallancePackageManager {
             {"General_NetworkError", "发生了网络错误"},
             {"General_OperationAborted", "操作已终止"},
             {"General_NoDatabase", "没有包数据库，请使用 bpm update 更新您的本地的包数据库"},
+            {"General_NoGamePath", "没有可用的 GamePath. 请使用 bpm config GamePath xxx 先设置好 GamePath"},
             
             //type
             {"PackageType_Mod", "模组"},

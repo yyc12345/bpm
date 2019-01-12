@@ -72,6 +72,7 @@ namespace BallancePackageManager {
             //init i18n
             I18N.Init(BPMCore.Config.Read()["Language"]);
 
+            /*
             var config = BPMCore.Config.Read();
             while (config["GamePath"] == "") {
                 Console.WriteLine(I18N.Core("Init_TypePath"));
@@ -79,6 +80,7 @@ namespace BallancePackageManager {
                 config["GamePath"] = cache.Path;
             }
             BPMCore.Config.Save(config);
+            */
             
             //run
             Command.CommandExecute(args);

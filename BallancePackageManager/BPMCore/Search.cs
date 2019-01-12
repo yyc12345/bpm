@@ -11,11 +11,7 @@ namespace BallancePackageManager.BPMCore {
     public static class Search {
 
         public static void Core(List<string> packageName) {
-            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
-                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                return;
-            }
-
+            
             packageName = (from item in packageName
                            where item != ""
                            select item).ToList();

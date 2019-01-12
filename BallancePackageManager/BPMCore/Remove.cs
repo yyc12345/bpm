@@ -10,11 +10,7 @@ namespace BallancePackageManager.BPMCore {
     public static class Remove {
 
         public static void Core(string packageName) {
-            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
-                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                return;
-            }
-
+            
             //get info
             var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
 

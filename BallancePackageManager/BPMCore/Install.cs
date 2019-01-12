@@ -12,11 +12,7 @@ namespace BallancePackageManager.BPMCore {
     public static class Install {
 
         public static void Core(string packageName) {
-            if (!File.Exists(Information.WorkPath.Enter("package.db").Path)) {
-                ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                return;
-            }
-
+            
             Console.WriteLine(I18N.Core("Install_CollectingPackageInfo"));
 
             //=================================================================pre-process

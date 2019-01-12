@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BallancePackageManager.BPMCore;
 using System.Threading;
 using ShareLib;
+using System.IO;
 
 namespace BallancePackageManager {
     public static class Command {
@@ -16,6 +17,11 @@ namespace BallancePackageManager {
                 return;
             }
 
+            //read status
+            var _config = Config.Read();
+            bool HaveGamePath = _config["GamePath"] != "";
+            bool HaveDatabase = File.Exists(Information.WorkPath.Enter("package.db").Path);
+
             var param = new List<string>(command);
             var head = param[0];
             param.RemoveAt(0);
@@ -23,24 +29,30 @@ namespace BallancePackageManager {
             void runCode() {
                 switch (head) {
                     case "update":
-                        if (param.Count() == 0) Update.Core();
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (param.Count() != 0) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Update.Core();
                         break;
                     case "search":
-                        if (param.Count() != 0) Search.Core(param);
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (param.Count() == 0) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Search.Core(param);
                         break;
                     case "install":
-                        if (param.Count() != 0) Install.Core(param[0]);
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (!HaveGamePath) ConsoleAssistance.WriteLine(I18N.Core("General_NoGamePath"), ConsoleColor.Red);
+                        else if (param.Count() != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Install.Core(param[0]);
                         break;
                     case "list":
-                        if (param.Count() == 0) BallancePackageManager.BPMCore.List.Core();
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if(param.Count() != 0) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else List.Core();
                         break;
                     case "remove":
-                        if (param.Count() != 0) Remove.Core(param[0]);
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (!HaveGamePath) ConsoleAssistance.WriteLine(I18N.Core("General_NoGamePath"), ConsoleColor.Red);
+                        else if (param.Count() != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Remove.Core(param[0]);
                         break;
                     case "config":
                         switch (param.Count) {
@@ -59,15 +71,20 @@ namespace BallancePackageManager {
                         }
                         break;
                     case "show":
-                        if (param.Count == 1) Show.Core(param[0]);
-                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if(param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else Show.Core(param[0]);
                         break;
                     case "deploy":
-                        if (param.Count != 2) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (!HaveGamePath) ConsoleAssistance.WriteLine(I18N.Core("General_NoGamePath"), ConsoleColor.Red);
+                        else if (param.Count != 2) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Deploy.Core(param[0], param[1]);
                         break;
                     case "guide":
-                        if (param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (!HaveGamePath) ConsoleAssistance.WriteLine(I18N.Core("General_NoGamePath"), ConsoleColor.Red);
+                        else if (param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Guide.Core(param[0]);
                         break;
                     case "help":
