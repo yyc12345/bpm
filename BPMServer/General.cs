@@ -4,19 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ShareLib;
 
 namespace BPMServer {
     public static class General {
 
+        //general config and status
+        public static bool IsMaintaining = false;
+        public static OutputStack GeneralOutput = new OutputStack();
+
+        //transport
         public static TcpProcessor CoreTcpProcessor;
-
         public static FileReaderManager CoreFileReader;
-
         public static List<ManualResetEvent> ManualResetEventList = new List<ManualResetEvent>();
-
         public static object lockList = new object();
 
-        public static OutputStack GeneralOutput = new OutputStack();
+        //maintain
+        public static Database GeneralDatabase = new Database();
 
     }
 }

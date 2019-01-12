@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace BPMSMaintenance {
+namespace BPMServer {
 
     public static class PackageManager {
 

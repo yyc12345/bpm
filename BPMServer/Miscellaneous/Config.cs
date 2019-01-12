@@ -48,7 +48,7 @@ namespace BPMServer {
             if (cache.Keys.Contains(itemName)) {
                 cache[itemName] = newValue;
                 Save(cache);
-                Console.WriteLine("New config has been applied");
+                Console.WriteLine("New config has been updated. Restart app to apply it.");
             } else ConsoleAssistance.WriteLine("Invalid config", ConsoleColor.Red);
         }
 
