@@ -73,14 +73,13 @@ namespace BallancePackageManager.ScriptPrecompile {
 
                 var cache_file = _currentPath.Enter("deploy.cfg").Path;
                 _currentPath.Backtracking();
-                var local_map_file = _currentPath.Enter("MapNameInPackage.nmo").Path;
-                var target_map_folder = _gamePath.Enter("Textures").Enter("Sky").Path;
+                var local_file_folder = _currentPath.Path;
+                var target_folder = _gamePath.Enter("Textures").Enter("Sky").Path;
 
                 //restore old
                 var deploy_cache = ScriptCommon.ReadDeploy(cache_file);
                 if (deploy_cache != "") {
-                    var old_level = int.Parse(deploy_cache);
-                    var target_old_file = new FilePathBuilder(target_map_folder).Enter($"Sky_{deploy_cache}").Path;
+                    var target_old_file = new FilePathBuilder(target_folder).Enter($"Sky_{deploy_cache}").Path;
                     ScriptCommon.RemoveWithRestore(target_old_file + "_Back.BMP");
                     ScriptCommon.RemoveWithRestore(target_old_file + "_Down.BMP");
                     ScriptCommon.RemoveWithRestore(target_old_file + "_Front.BMP");
@@ -107,12 +106,12 @@ namespace BallancePackageManager.ScriptPrecompile {
                 if (!legal_character_dict.Contains(sky)) return (false, "Illegal formation");
 
                 
-                var target_file = new FilePathBuilder(target_map_folder).Enter($"Sky_{sky}").Path;
-                ScriptCommon.CopyWithBackups(target_file + "_Back.BMP", new FilePathBuilder(local_map_file).Enter("back.bmp").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_Down.BMP", new FilePathBuilder(local_map_file).Enter("down.bmp").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_Front.BMP", new FilePathBuilder(local_map_file).Enter("front.bmp").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_Left.BMP", new FilePathBuilder(local_map_file).Enter("left.bmp").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_Right.BMP", new FilePathBuilder(local_map_file).Enter("right.bmp").Path);
+                var target_file = new FilePathBuilder(target_folder).Enter($"Sky_{sky}").Path;
+                ScriptCommon.CopyWithBackups(target_file + "_Back.BMP", new FilePathBuilder(local_file_folder).Enter("back.bmp").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_Down.BMP", new FilePathBuilder(local_file_folder).Enter("down.bmp").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_Front.BMP", new FilePathBuilder(local_file_folder).Enter("front.bmp").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_Left.BMP", new FilePathBuilder(local_file_folder).Enter("left.bmp").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_Right.BMP", new FilePathBuilder(local_file_folder).Enter("right.bmp").Path);
 
                 ScriptCommon.RecordDeploy(cache_file, sky);
             } catch (Exception e) {

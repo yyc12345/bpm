@@ -143,6 +143,8 @@ namespace BallancePackageManager.BPMCore {
                 if (!cacheRes.status) {
                     ConsoleAssistance.WriteLine(I18N.Core("General_ScriptError"), ConsoleColor.Red);
                     ConsoleAssistance.WriteLine(cacheRes.desc, ConsoleColor.Red);
+                    //save installed package info
+                    recorder.Save();
                     return;
                 }
 

@@ -51,7 +51,7 @@ namespace BallancePackageManager.ScriptPrecompile {
                 if (parameter == "") return (true, "");
                 var level = int.Parse(parameter);
                 if (!(level >= 1 && level <= 15)) return (false, "Illegal parameter range");
-                var target_file = new FilePathBuilder(target_map_folder).Enter($"Level_{(level < 10 ? "0" : "")}{deploy_cache}.NMO").Path;
+                var target_file = new FilePathBuilder(target_map_folder).Enter($"Level_{(level < 10 ? "0" : "")}{parameter}.NMO").Path;
                 ScriptCommon.CopyWithBackups(target_file, local_map_file);
                 ScriptCommon.RecordDeploy(cache_file, level.ToString());
             } catch (Exception e) {

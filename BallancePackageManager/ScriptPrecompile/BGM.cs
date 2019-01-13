@@ -64,19 +64,16 @@ namespace BallancePackageManager.ScriptPrecompile {
 
                 var cache_file = _currentPath.Enter("deploy.cfg").Path;
                 _currentPath.Backtracking();
-                var local_map_file = _currentPath.Enter("MapNameInPackage.nmo").Path;
-                var target_map_folder = _gamePath.Enter("Sounds").Path;
+                var local_file_folder = _currentPath.Path;
+                var target_folder = _gamePath.Enter("Sounds").Path;
 
                 //restore old
                 var deploy_cache = ScriptCommon.ReadDeploy(cache_file);
                 if (deploy_cache != "") {
-                    var old_level = int.Parse(deploy_cache);
-                    var target_old_file = new FilePathBuilder(target_map_folder).Enter($"Music_Theme_{deploy_cache}").Path;
-                    ScriptCommon.RemoveWithRestore(target_old_file + "_Back.BMP");
-                    ScriptCommon.RemoveWithRestore(target_old_file + "_Down.BMP");
-                    ScriptCommon.RemoveWithRestore(target_old_file + "_Front.BMP");
-                    ScriptCommon.RemoveWithRestore(target_old_file + "_Left.BMP");
-                    ScriptCommon.RemoveWithRestore(target_old_file + "_Right.BMP");
+                    var target_old_file = new FilePathBuilder(target_folder).Enter($"Music_Theme_{deploy_cache}").Path;
+                    ScriptCommon.RemoveWithRestore(target_old_file + "_1.wav");
+                    ScriptCommon.RemoveWithRestore(target_old_file + "_2.wav");
+                    ScriptCommon.RemoveWithRestore(target_old_file + "_3.wav");
                 }
                 ScriptCommon.RecordDeploy(cache_file, "");
 
@@ -98,10 +95,10 @@ namespace BallancePackageManager.ScriptPrecompile {
                 if (!legal_character_dict.Contains(theme)) return (false, "Illegal formation");
 
 
-                var target_file = new FilePathBuilder(target_map_folder).Enter($"Music_Theme_{theme}").Path;
-                ScriptCommon.CopyWithBackups(target_file + "_1.wav", new FilePathBuilder(local_map_file).Enter("1.wav").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_2.wav", new FilePathBuilder(local_map_file).Enter("2.wav").Path);
-                ScriptCommon.CopyWithBackups(target_file + "_3.wav", new FilePathBuilder(local_map_file).Enter("3.wav").Path);
+                var target_file = new FilePathBuilder(target_folder).Enter($"Music_Theme_{theme}").Path;
+                ScriptCommon.CopyWithBackups(target_file + "_1.wav", new FilePathBuilder(local_file_folder).Enter("1.wav").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_2.wav", new FilePathBuilder(local_file_folder).Enter("2.wav").Path);
+                ScriptCommon.CopyWithBackups(target_file + "_3.wav", new FilePathBuilder(local_file_folder).Enter("3.wav").Path);
 
                 ScriptCommon.RecordDeploy(cache_file, theme);
             } catch (Exception e) {
