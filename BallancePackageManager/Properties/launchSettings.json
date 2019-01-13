@@ -1,8 +1,7 @@
 {
   "profiles": {
     "BallancePackageManager": {
-      "commandName": "Project",
-      "commandLineArgs": "search ball loader jjy"
+      "commandName": "Project"
     }
   }
 }

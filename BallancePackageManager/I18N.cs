@@ -58,6 +58,7 @@ namespace BallancePackageManager {
             {"Help_12", "Glory to BKT."},
             {"Help_13", "  guide - show specific package's help"},
             {"Help_14", "  help - print this help"},
+            {"Help_15", "  clean - clean local cache file"},
 
             //config
             {"Config_InvalidConfig", "Invalid config"},
@@ -92,6 +93,11 @@ namespace BallancePackageManager {
             {"Remove_RemoveList", "There are the package which will be deleted: "},
             {"Remove_Removing", "Removing {0}..."},
             {"Remove_Success", "Remove {0} successfully"},
+
+            //clean
+            {"Clean_FileList", "There are the files which will be deleted: "},
+            {"Clean_Deleting", "Deleting {0}..."},
+            {"Clean_CleanAll", "All cache file, downloaded zip and json files will be deleted."},
 
             //search & Show
             {"Search&Show_Aka", "aka: "},
@@ -180,6 +186,7 @@ namespace BallancePackageManager {
             {"Help_12", "荣耀属于 BKT"},
             {"Help_13", "  guide - 显示指定包的帮助信息"},
             {"Help_14", "  help - 显示这段帮助信息"},
+            {"Help_15", "  clean - 清理本地缓存文件"},
 
             //config
             {"Config_InvalidConfig", "无效的设置"},
@@ -214,6 +221,11 @@ namespace BallancePackageManager {
             {"Remove_RemoveList", "下列包将会被移除："},
             {"Remove_Removing", "移除 {0}..."},
             {"Remove_Success", "成功移除 {0}"},
+            
+            //clean
+            {"Clean_FileList", "下列文件将会被删除："},
+            {"Clean_Deleting", "删除 {0}..."},
+            {"Clean_CleanAll", "所有缓存文件，下载的 zip 以及 json 文件将会被删除"},
 
             //search & Show
             {"Search&Show_Aka", "别名: "},

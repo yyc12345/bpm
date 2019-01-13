@@ -45,7 +45,7 @@ namespace BallancePackageManager {
                         break;
                     case "list":
                         if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                        else if(param.Count() != 0) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else if (param.Count() != 0) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else List.Core();
                         break;
                     case "remove":
@@ -72,7 +72,7 @@ namespace BallancePackageManager {
                         break;
                     case "show":
                         if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
-                        else if(param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
+                        else if (param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Show.Core(param[0]);
                         break;
                     case "deploy":
@@ -86,6 +86,12 @@ namespace BallancePackageManager {
                         else if (!HaveGamePath) ConsoleAssistance.WriteLine(I18N.Core("General_NoGamePath"), ConsoleColor.Red);
                         else if (param.Count != 1) ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         else Guide.Core(param[0]);
+                        break;
+                    case "clean":
+                        if (!HaveDatabase) ConsoleAssistance.WriteLine(I18N.Core("General_NoDatabase"), ConsoleColor.Red);
+                        else if (param.Count == 1) Clean.Core(param[0]);
+                        else if (param.Count == 0) Clean.Core();
+                        else ConsoleAssistance.WriteLine(I18N.Core("Command_InvalidParameterCount"), ConsoleColor.Red);
                         break;
                     case "help":
                         OutputHelp();
@@ -125,6 +131,7 @@ namespace BallancePackageManager {
             //Console.WriteLine("  restore - remove all installed package");
             Console.WriteLine(I18N.Core("Help_11"));
             Console.WriteLine(I18N.Core("Help_13"));
+            Console.WriteLine(I18N.Core("Help_15"));
             Console.WriteLine(I18N.Core("Help_14"));
             //Console.WriteLine("  exit - exit bpm");
             Console.WriteLine("");
