@@ -14,7 +14,7 @@ namespace BallancePackageManager {
 
         static (string host, int port) GetHostAndPort() {
             var config = Config.Read()["Sources"].Split(':');
-            return (string.Join(":", config, 0, config.Length - 2), int.Parse(config[config.Length - 1]));
+            return (string.Join(":", config, 0, config.Length - 1), int.Parse(config[config.Length - 1]));
         }
 
         static (FileStream fs, DownloadResult res, string url) GetLocalFile(RemoteFileType remoteFileType, string remoteFile) {

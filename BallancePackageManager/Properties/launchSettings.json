@@ -1,8 +1,7 @@
 {
   "profiles": {
     "BallancePackageManager": {
-      "commandName": "Project",
-      "commandLineArgs": "clean test@1"
+      "commandName": "Project"
     }
   }
 }
