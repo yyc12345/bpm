@@ -8,25 +8,26 @@ namespace BPMServer {
     public class OutputStack {
 
         Queue<string> queue = new Queue<string>();
-        object lockQueue = new object();
+        object globalLock = new object();
         bool isStopped = false;
 
         public void Add(string msg) {
-            if (isStopped) {
-                lock (lockQueue) {
-                    queue.Enqueue(msg);
-                }
-            } else Console.WriteLine(msg);
+            lock (globalLock) {
+                if (isStopped) queue.Enqueue(msg);
+                else Console.WriteLine(msg);
+            }
         }
 
         public void Stop() {
-            if (isStopped) return;
-            isStopped = true;
+            lock (globalLock) {
+                if (isStopped) return;
+                isStopped = true;
+            }
         }
 
         public void Release() {
-            if (!isStopped) return;
-            lock (lockQueue) {
+            lock (globalLock) {
+                if (!isStopped) return;
                 while (queue.Count != 0) {
                     Console.WriteLine(queue.Dequeue());
                 }

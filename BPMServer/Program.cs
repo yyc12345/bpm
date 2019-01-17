@@ -40,7 +40,10 @@ namespace BPMServer {
                     if (command.Length == 0) {
                         ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
                         OutputHelp();
-                        return;
+
+                        //re-output words
+                        General.GeneralOutput.Release();
+                        continue;
                     }
 
                     var param = new List<string>(CommandSplitter.SplitCommand(command));
@@ -143,6 +146,7 @@ namespace BPMServer {
                             break;
                         default:
                             ConsoleAssistance.WriteLine("Invalid command", ConsoleColor.Red);
+                            OutputHelp();
                             break;
                     }
 
@@ -153,7 +157,7 @@ namespace BPMServer {
 
             app_end:
             ConsoleAssistance.WriteLine("Server exit!", ConsoleColor.Yellow);
-            Environment.Exit(0);
+            //Environment.Exit(0);
         }
 
         static void OutputHelp() {

@@ -12,7 +12,8 @@ namespace BPMServer {
     public class TcpProcessor {
 
         public TcpProcessor(int port4, int port6) {
-            ThreadPool.SetMaxThreads(1, 10);
+            //don't enable this command. it will result in that nobody can download resources.
+            //ThreadPool.SetMaxThreads(1, 10);
             this.Port4 = port4;
             this.Port6 = port6;
         }
@@ -20,7 +21,6 @@ namespace BPMServer {
         public void Close() {
             StopListen();
             //tdClientListCleaner.Abort();
-
         }
 
         #region listen
@@ -59,22 +59,22 @@ namespace BPMServer {
 
         void GetCaller(Socket s) {
             Task.Run(() => {
-                try {
-                    Socket client = s.Accept();
-                    General.GeneralOutput.Add($"Receive {client.RemoteEndPoint.ToString()} connection");
-                    ManualResetEvent mre = new ManualResetEvent(false);
-                    lock (General.lockList) {
-                        General.ManualResetEventList.Add(mre);
+                while (true) {
+                    try {
+                        Socket client = s.Accept();
+                        General.GeneralOutput.Add($"Receive {client.RemoteEndPoint.ToString()} connection");
+                        ManualResetEvent mre = new ManualResetEvent(false);
+                        lock (General.lockList) {
+                            General.ManualResetEventList.Add(mre);
+                        }
+
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(ClientProcessor), (client, mre));
+                    } catch (Exception) {
+                        //jump
+                        //don't use continue; it will raise a infinity loop when using /mode maintain and make app to be slow.
+                        break;
                     }
-
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ClientProcessor), (client, mre));
-                } catch (Exception) {
-                    //jump
-                    return;
                 }
-
-                //accept next
-                this.GetCaller(s);
             });
         }
 
@@ -100,7 +100,6 @@ namespace BPMServer {
                     goto end;
                 } else client.Send(BitConverter.GetBytes(true), 0, 1, SocketFlags.None);
                 General.GeneralOutput.Add($"[{consoleOutput}] TRANSPORT_VER pass");
-
                 //verfication code
                 //int verificationCode;
                 client.Receive(data, 0, 4, SocketFlags.None);
@@ -145,20 +144,23 @@ namespace BPMServer {
                     goto end;
                 } else client.Send(BitConverter.GetBytes(true), 0, 1, SocketFlags.None);
                 General.GeneralOutput.Add($"[{consoleOutput}] File is existed");
-
                 client.Send(BitConverter.GetBytes(res.blockCount), 0, 4, SocketFlags.None);
 
-                for (int i = 1; i <= res.blockCount; i++) {
-                    var cache = General.CoreFileReader.Read(dataUrl, i);
+                data = new byte[4];
+                while (true) {
+                    client.Receive(data, 0, 4, SocketFlags.None);
+                    var getIndex = BitConverter.ToInt32(data, 0);
+                    if (getIndex <= 0 || getIndex > res.blockCount) break;
+                    Console.WriteLine($"[{consoleOutput}] Request new segment of package. Index: {getIndex}");
+                    var cache = General.CoreFileReader.Read(dataUrl, getIndex);
                     client.Send(BitConverter.GetBytes(cache.Length), 0, 4, SocketFlags.None);
                     client.Send(cache, 0, cache.Length, SocketFlags.None);
                 }
 
                 General.CoreFileReader.RemoveFile(dataUrl);
                 General.GeneralOutput.Add($"[{consoleOutput}] File send OK");
-
-            } catch (Exception) {
-                General.GeneralOutput.Add($"[{consoleOutput}] A error was raised when communicate with client.");
+            } catch (Exception e) {
+                General.GeneralOutput.Add($"[{consoleOutput}] A error was raised when communicate with client: {e.Message}");
                 //pass
             }
 
@@ -172,7 +174,6 @@ namespace BPMServer {
                 General.ManualResetEventList.Remove(mre);
             }
         }
-
 
         #endregion
 

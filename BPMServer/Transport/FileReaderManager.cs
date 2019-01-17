@@ -26,7 +26,9 @@ namespace BPMServer {
                     if (!File.Exists(url)) return (false, -1);
                     var cache = new FileStream(url, FileMode.Open, FileAccess.Read);
                     var length = (int)cache.Length;
-                    fileList.Add(url, new FileReaderItem() { fs = cache, BlockSize = FILE_BLOCK_SIZE, BlockCount = (length % FILE_BLOCK_SIZE == 0 ? length / FILE_BLOCK_SIZE : (length / FILE_BLOCK_SIZE) + 1), LastBlockLength = length % FILE_BLOCK_SIZE, UsageCount = 1 });
+                    fileList.Add(url, new FileReaderItem() { fs = cache,
+                        BlockSize = FILE_BLOCK_SIZE, BlockCount = (length % FILE_BLOCK_SIZE == 0 ? length / FILE_BLOCK_SIZE : (length / FILE_BLOCK_SIZE) + 1),
+                        LastBlockLength = (length % FILE_BLOCK_SIZE == 0 ? FILE_BLOCK_SIZE : length % FILE_BLOCK_SIZE), UsageCount = 1 });
                     return (true, fileList[url].BlockCount);
                 }
             }

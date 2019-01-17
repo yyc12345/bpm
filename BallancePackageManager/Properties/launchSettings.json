@@ -1,7 +1,8 @@
 {
   "profiles": {
     "BallancePackageManager": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "update"
     }
   }
 }

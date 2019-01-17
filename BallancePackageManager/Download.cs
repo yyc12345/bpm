@@ -12,6 +12,7 @@ namespace BallancePackageManager {
 
     public static class Download {
 
+        //assistant func
         static (string host, int port) GetHostAndPort() {
             var config = Config.Read()["Sources"].Split(':');
             return (string.Join(":", config, 0, config.Length - 1), int.Parse(config[config.Length - 1]));
@@ -56,7 +57,8 @@ namespace BallancePackageManager {
                 return (null, DownloadResult.NetworkError);
             }
         }
-
+        
+        //real func
         public static DownloadResult DownloadDatabase() {
             var res1 = GetLocalFile(RemoteFileType.PackageDatabase, "");
             if (res1.res != DownloadResult.OK) return res1.res;
@@ -101,11 +103,7 @@ namespace BallancePackageManager {
                 /*
                 DATA
 
-                Version is ok? | Verification Code | Package is existed? | Package Count | Package
-
-                PACKAGE
-
-                Package Size | Data
+                Version is ok? | Verification Code | Package is existed? | Package Count
                 */
 
                 var recData = new byte[1];
@@ -123,8 +121,23 @@ namespace BallancePackageManager {
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
+
+                /*
+                ---------------Send:
+
+                REQUEST:
+
+                Segment index (based on 1)(Send 0 to cut wire)
+
+                ---------------Receive:
+
+                PACKAGE
+
+                Package Size | Data
+                */
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
+                    res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
                     res2.ns.Read(recData, 0, 4);
                     packageSize = BitConverter.ToInt32(recData, 0);
                     realData = new byte[packageSize];
@@ -133,6 +146,7 @@ namespace BallancePackageManager {
                     fs.Write(realData, 0, packageSize);
                     consoleProgress.Next();
                 }
+                res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
@@ -190,11 +204,7 @@ namespace BallancePackageManager {
                 /*
                 DATA
 
-                Version is ok? | Verification Code | Package is existed? | Package Count | Package
-
-                PACKAGE
-
-                Package Size | Data
+                Version is ok? | Verification Code | Package is existed? | Package Count
                 */
                 var recData = new byte[1];
                 res2.ns.Read(recData, 0, 1);
@@ -211,8 +221,23 @@ namespace BallancePackageManager {
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
+
+                /*
+                ---------------Send:
+
+                REQUEST:
+
+                Segment index (based on 1)(Send 0 to cut wire)
+
+                ---------------Receive:
+
+                PACKAGE
+
+                Package Size | Data
+                */
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
+                    res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
                     res2.ns.Read(recData, 0, 4);
                     packageSize = BitConverter.ToInt32(recData, 0);
                     realData = new byte[packageSize];
@@ -221,6 +246,8 @@ namespace BallancePackageManager {
                     fs.Write(realData, 0, packageSize);
                     consoleProgress.Next();
                 }
+                res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
+                
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
@@ -297,8 +324,24 @@ namespace BallancePackageManager {
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 var consoleProgress = new DownloadDisplay(packageCount);
                 int packageSize = 1024;
+
+
+                /*
+                ---------------Send:
+
+                REQUEST:
+
+                Segment index (based on 1)(Send 0 to cut wire)
+
+                ---------------Receive:
+
+                PACKAGE
+
+                Package Size | Data
+                */
                 byte[] realData;
                 for (int i = 0; i < packageCount; i++) {
+                    res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
                     res2.ns.Read(recData, 0, 4);
                     packageSize = BitConverter.ToInt32(recData, 0);
                     realData = new byte[packageSize];
@@ -307,6 +350,7 @@ namespace BallancePackageManager {
                     fs.Write(realData, 0, packageSize);
                     consoleProgress.Next();
                 }
+                res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
 
             } catch (Exception) {
                 return DownloadResult.RemoteServerError;
@@ -321,23 +365,23 @@ namespace BallancePackageManager {
         public static string JudgeDownloadResult(DownloadResult res) {
             switch (res) {
                 case DownloadResult.OK:
-                    //return "Download OK";
+                //return "Download OK";
                 case DownloadResult.ExistedLocalFile:
-                    //return "Detect existed local package cache. Jump downloading";
+                //return "Detect existed local package cache. Jump downloading";
                 case DownloadResult.LocalFileOperationError:
-                    //return "Couldn't operate local package cache";
+                //return "Couldn't operate local package cache";
                 case DownloadResult.NetworkError:
-                    //return "Network error";
+                //return "Network error";
                 case DownloadResult.VerificationError:
-                    //return "Un-matched verification code";
+                //return "Un-matched verification code";
                 case DownloadResult.Timeout:
-                    //return "Network timeout";
+                //return "Network timeout";
                 case DownloadResult.NoPackage:
-                    //return "No matched package";
+                //return "No matched package";
                 case DownloadResult.RemoteServerError:
-                    //return "Remote server return a error";
+                //return "Remote server return a error";
                 case DownloadResult.OutdatedVersion:
-                    //return "Outdated bpm version";
+                //return "Outdated bpm version";
                 case DownloadResult.UnexceptError:
                     //return "Unknow error";
                     return I18N.Core($"Download_{res.ToString()}");
