@@ -1,2 +1,3 @@
 ﻿#!/bin/bash
-dotnet $(dirname $0)/BallancePackageManager.dll $*
+cd $(dirname $0)
+dotnet ./BallancePackageManager.dll $*
