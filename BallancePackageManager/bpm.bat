@@ -1,2 +1,2 @@
-﻿@echo off
-dotnet BallancePackageManager.dll %1 %2 %3 %4 %5 %6 %7 %8 %9
+@echo off
+dotnet "%~dp0\BallancePackageManager.dll" %1 %2 %3 %4 %5 %6 %7 %8 %9
