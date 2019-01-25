@@ -85,6 +85,7 @@ namespace BPMServer {
         void ClientProcessor(object s) {
             var (client, mre) = ((Socket client, ManualResetEvent mre))s;
             var consoleOutput = client.RemoteEndPoint.ToString();
+            client.SendBufferSize = ShareLib.Transport.SOCKET_BUFFER_SIZE;
 
             try {
                 //check sign
@@ -151,7 +152,7 @@ namespace BPMServer {
                     client.Receive(data, 0, 4, SocketFlags.None);
                     var getIndex = BitConverter.ToInt32(data, 0);
                     if (getIndex <= 0 || getIndex > res.blockCount) break;
-                    Console.WriteLine($"[{consoleOutput}] Request new segment of package. Index: {getIndex}");
+                    General.GeneralOutput.Add($"[{consoleOutput}] Request new segment of package. Index: {getIndex}");
                     var cache = General.CoreFileReader.Read(dataUrl, getIndex);
                     client.Send(BitConverter.GetBytes(cache.Length), 0, 4, SocketFlags.None);
                     client.Send(cache, 0, cache.Length, SocketFlags.None);

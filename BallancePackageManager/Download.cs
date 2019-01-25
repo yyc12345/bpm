@@ -12,6 +12,9 @@ namespace BallancePackageManager {
 
     public static class Download {
 
+        static readonly int READ_INTERVAL = 200;
+        static readonly int READ_TIMEOUT = 60 * 1000 / READ_INTERVAL;
+
         //assistant func
         static (string host, int port) GetHostAndPort() {
             var config = Config.Read()["Sources"].Split(':');
@@ -51,19 +54,21 @@ namespace BallancePackageManager {
                 var tcp = new TcpClient();
                 tcp.Connect(remote, port);
                 var ns = tcp.GetStream();
+                tcp.Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                tcp.Client.ReceiveBufferSize = ShareLib.Transport.SOCKET_BUFFER_SIZE;
 
                 return (ns, DownloadResult.OK);
             } catch (Exception) {
                 return (null, DownloadResult.NetworkError);
             }
         }
-        
-        //real func
-        public static DownloadResult DownloadDatabase() {
-            var res1 = GetLocalFile(RemoteFileType.PackageDatabase, "");
+
+        //real function
+        static DownloadResult PreDownload(RemoteFileType remoteFileType, string remoteFile) {
+            var res1 = GetLocalFile(remoteFileType, remoteFile);
             if (res1.res != DownloadResult.OK) return res1.res;
 
-            var cache = DownloadDatabaseEx(res1.fs);
+            var cache = RealDownload(remoteFileType, remoteFile, res1.fs);
             if (cache != DownloadResult.OK) {
                 res1.fs.Close();
                 res1.fs.Dispose();
@@ -73,207 +78,7 @@ namespace BallancePackageManager {
             Console.Write("\n");
             return cache;
         }
-        static DownloadResult DownloadDatabaseEx(FileStream fs) {
-
-            //var res1 = GetLocalFile(RemoteFileType.PackageDatabase, "");
-            //if (res1.res != DownloadResult.OK) return res1.res;
-
-            var remote = GetHostAndPort();
-            var res2 = GetClient(remote.host, remote.port);
-            if (res2.result != DownloadResult.OK) return res2.result;
-
-            var rnd = new Random();
-            var verificationCode = rnd.Next();
-            try {
-                //send
-                /*
-                DATA
-
-                Sign code | Transport version | Verification Code | Need resources type
-                */
-                res2.ns.Write(BitConverter.GetBytes(Transport.SIGN), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes(Transport.TRANSPORT_VER), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes(verificationCode), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes((int)RemoteFileType.PackageDatabase), 0, 4);
-                //var data = Encoding.UTF8.GetBytes(remoteFile);
-                //ns.Write(BitConverter.GetBytes(data.Length), 0, 4);
-                //ns.Write(data, 0, data.Length);
-
-                //receive
-                /*
-                DATA
-
-                Version is ok? | Verification Code | Package is existed? | Package Count
-                */
-
-                var recData = new byte[1];
-                res2.ns.Read(recData, 0, 1);
-                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.OutdatedVersion;
-                recData = new byte[4];
-                res2.ns.Read(recData, 0, 4);
-                if (BitConverter.ToInt32(recData, 0) != verificationCode) return DownloadResult.VerificationError;
-                recData = new byte[1];
-                res2.ns.Read(recData, 0, 1);
-                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.NoPackage;
-
-                recData = new byte[4];
-                res2.ns.Read(recData, 0, 4);
-                var packageCount = BitConverter.ToInt32(recData, 0);
-                var consoleProgress = new DownloadDisplay(packageCount);
-                int packageSize = 1024;
-
-                /*
-                ---------------Send:
-
-                REQUEST:
-
-                Segment index (based on 1)(Send 0 to cut wire)
-
-                ---------------Receive:
-
-                PACKAGE
-
-                Package Size | Data
-                */
-                byte[] realData;
-                for (int i = 0; i < packageCount; i++) {
-                    res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
-                    res2.ns.Read(recData, 0, 4);
-                    packageSize = BitConverter.ToInt32(recData, 0);
-                    realData = new byte[packageSize];
-                    res2.ns.Read(realData, 0, packageSize);
-
-                    fs.Write(realData, 0, packageSize);
-                    consoleProgress.Next();
-                }
-                res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
-
-            } catch (Exception) {
-                return DownloadResult.RemoteServerError;
-            }
-
-            fs.Close();
-            res2.ns.Close();
-            //server close tcp.
-            //tcp.Close();
-            return DownloadResult.OK;
-
-        }
-
-        public static DownloadResult DownloadPackageInfo(string remoteFile) {
-            var res1 = GetLocalFile(RemoteFileType.PackageInfo, remoteFile);
-            if (res1.res != DownloadResult.OK) return res1.res;
-
-            var cache = DownloadPackageInfoEx(remoteFile, res1.fs);
-            if (cache != DownloadResult.OK) {
-                res1.fs.Close();
-                res1.fs.Dispose();
-                File.Delete(res1.url);
-            }
-
-            Console.Write("\n");
-            return cache;
-        }
-        static DownloadResult DownloadPackageInfoEx(string remoteFile, FileStream fs) {
-
-            //var res1 = GetLocalFile(RemoteFileType.PackageInfo, remoteFile);
-            //if (res1.res != DownloadResult.OK) return res1.res;
-
-            var remote = GetHostAndPort();
-            var res2 = GetClient(remote.host, remote.port);
-            if (res2.result != DownloadResult.OK) return res2.result;
-
-            var rnd = new Random();
-            var verificationCode = rnd.Next();
-            try {
-                //send
-                /*
-                DATA
-
-                Sign code | Transport version | Verification Code | Need resources type | Package name length | Package name
-                */
-                res2.ns.Write(BitConverter.GetBytes(Transport.SIGN), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes(Transport.TRANSPORT_VER), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes(verificationCode), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes((int)RemoteFileType.PackageInfo), 0, 4);
-                var data = Encoding.UTF8.GetBytes(remoteFile);
-                res2.ns.Write(BitConverter.GetBytes(data.Length), 0, 4);
-                res2.ns.Write(data, 0, data.Length);
-
-                //receive
-                /*
-                DATA
-
-                Version is ok? | Verification Code | Package is existed? | Package Count
-                */
-                var recData = new byte[1];
-                res2.ns.Read(recData, 0, 1);
-                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.OutdatedVersion;
-                recData = new byte[4];
-                res2.ns.Read(recData, 0, 4);
-                if (BitConverter.ToInt32(recData, 0) != verificationCode) return DownloadResult.VerificationError;
-                recData = new byte[1];
-                res2.ns.Read(recData, 0, 1);
-                if (!BitConverter.ToBoolean(recData, 0)) return DownloadResult.NoPackage;
-
-                recData = new byte[4];
-                res2.ns.Read(recData, 0, 4);
-                var packageCount = BitConverter.ToInt32(recData, 0);
-                var consoleProgress = new DownloadDisplay(packageCount);
-                int packageSize = 1024;
-
-                /*
-                ---------------Send:
-
-                REQUEST:
-
-                Segment index (based on 1)(Send 0 to cut wire)
-
-                ---------------Receive:
-
-                PACKAGE
-
-                Package Size | Data
-                */
-                byte[] realData;
-                for (int i = 0; i < packageCount; i++) {
-                    res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
-                    res2.ns.Read(recData, 0, 4);
-                    packageSize = BitConverter.ToInt32(recData, 0);
-                    realData = new byte[packageSize];
-                    res2.ns.Read(realData, 0, packageSize);
-
-                    fs.Write(realData, 0, packageSize);
-                    consoleProgress.Next();
-                }
-                res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
-                
-
-            } catch (Exception) {
-                return DownloadResult.RemoteServerError;
-            }
-
-            fs.Close();
-            res2.ns.Close();
-            return DownloadResult.OK;
-
-        }
-
-        public static DownloadResult DownloadPackage(string remoteFile) {
-            var res1 = GetLocalFile(RemoteFileType.Package, remoteFile);
-            if (res1.res != DownloadResult.OK) return res1.res;
-
-            var cache = DownloadPackageEx(remoteFile, res1.fs);
-            if (cache != DownloadResult.OK) {
-                res1.fs.Close();
-                res1.fs.Dispose();
-                File.Delete(res1.url);
-            }
-
-            Console.Write("\n");
-            return cache;
-        }
-        static DownloadResult DownloadPackageEx(string remoteFile, FileStream fs) {
+        static DownloadResult RealDownload(RemoteFileType remoteFileType, string remoteFile, FileStream fs) {
 
             //var res1 = GetLocalFile(RemoteFileType.Package, remoteFile);
             //if (res1.res != DownloadResult.OK) return res1.res;
@@ -286,18 +91,29 @@ namespace BallancePackageManager {
             var verificationCode = rnd.Next();
             try {
                 //send
+
+                //Package & PacnageInfo
                 /*
                 DATA
 
                 Sign code | Transport version | Verification Code | Need resources type | Package name length | Package name
                 */
+
+                //PackageDatabase
+                /*
+                DATA
+
+                Sign code | Transport version | Verification Code | Need resources type
+                */
                 res2.ns.Write(BitConverter.GetBytes(Transport.SIGN), 0, 4);
                 res2.ns.Write(BitConverter.GetBytes(Transport.TRANSPORT_VER), 0, 4);
                 res2.ns.Write(BitConverter.GetBytes(verificationCode), 0, 4);
-                res2.ns.Write(BitConverter.GetBytes((int)RemoteFileType.Package), 0, 4);
-                var data = Encoding.UTF8.GetBytes(remoteFile);
-                res2.ns.Write(BitConverter.GetBytes(data.Length), 0, 4);
-                res2.ns.Write(data, 0, data.Length);
+                res2.ns.Write(BitConverter.GetBytes((int)remoteFileType), 0, 4);
+                if (remoteFileType != RemoteFileType.PackageDatabase) {
+                    var data = Encoding.UTF8.GetBytes(remoteFile);
+                    res2.ns.Write(BitConverter.GetBytes(data.Length), 0, 4);
+                    res2.ns.Write(data, 0, data.Length);
+                }
 
                 //receive
                 /*
@@ -323,8 +139,7 @@ namespace BallancePackageManager {
                 res2.ns.Read(recData, 0, 4);
                 var packageCount = BitConverter.ToInt32(recData, 0);
                 var consoleProgress = new DownloadDisplay(packageCount);
-                int packageSize = 1024;
-
+                int packageSize = Transport.SEGMENT_LENGTH;
 
                 /*
                 ---------------Send:
@@ -339,15 +154,40 @@ namespace BallancePackageManager {
 
                 Package Size | Data
                 */
-                byte[] realData;
+                byte[] netbuffer = new byte[1024];
+                int readBytes = 0;
                 for (int i = 0; i < packageCount; i++) {
+                    readBytes = 0;
+                    //order data
                     res2.ns.Write(BitConverter.GetBytes(i + 1), 0, 4);
+
+                    //read length
+                    var circleCount = 0;
+                    while (true) {
+                        if (circleCount >= READ_TIMEOUT) throw new SocketException();
+                        if (!res2.ns.DataAvailable) {
+                            circleCount++;
+                            System.Threading.Thread.Sleep(READ_INTERVAL);
+                        } else break;
+                    }
                     res2.ns.Read(recData, 0, 4);
                     packageSize = BitConverter.ToInt32(recData, 0);
-                    realData = new byte[packageSize];
-                    res2.ns.Read(realData, 0, packageSize);
 
-                    fs.Write(realData, 0, packageSize);
+                    //read body
+                    circleCount = 0;
+                    while (readBytes < packageSize) {
+                        while (true) {
+                            if (circleCount >= READ_TIMEOUT) throw new SocketException();
+                            if (!res2.ns.DataAvailable) {
+                                circleCount++;
+                                System.Threading.Thread.Sleep(READ_INTERVAL);
+                            } else break;
+                        }
+                        var readedSize = res2.ns.Read(netbuffer, 0, 1024);
+                        fs.Write(netbuffer, 0, readedSize);
+                        readBytes += readedSize;
+                    }
+
                     consoleProgress.Next();
                 }
                 res2.ns.Write(BitConverter.GetBytes(0), 0, 4);
@@ -361,6 +201,11 @@ namespace BallancePackageManager {
             return DownloadResult.OK;
 
         }
+
+        //invoke func
+        public static DownloadResult DownloadDatabase() => PreDownload(RemoteFileType.PackageDatabase, "");
+        public static DownloadResult DownloadPackageInfo(string remoteFile) => PreDownload(RemoteFileType.PackageInfo, remoteFile);
+        public static DownloadResult DownloadPackage(string remoteFile) => PreDownload(RemoteFileType.Package, remoteFile);
 
         public static string JudgeDownloadResult(DownloadResult res) {
             switch (res) {

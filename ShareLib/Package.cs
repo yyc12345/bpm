@@ -38,6 +38,8 @@ namespace ShareLib {
     public static class Transport {
         public static readonly int SIGN = 61;
         public static readonly int TRANSPORT_VER = 1;
+        public static readonly int SEGMENT_LENGTH = 1024 * 512;
+        public static readonly int SOCKET_BUFFER_SIZE = 1024 * 1024;
     }
 
 }

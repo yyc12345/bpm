@@ -52,7 +52,7 @@ namespace BPMScriptDebugger {
 
                 try {
                     //read code
-                    var fs = new StreamReader("Test.cs", Encoding.UTF8);
+                    var fs = new StreamReader("setup.cs", Encoding.UTF8);
                     var code = originCode.Replace("{PersonalCode}", fs.ReadToEnd());
                     fs.Close();
                     fs.Dispose();
@@ -127,6 +127,10 @@ namespace BPMScriptDebugger {
                     if (command == "") break;
 
                     var real_command = CommandSplitter.SplitCommand(command);
+                    if (real_command.Count < 2) {
+                        real_command.Add("");
+                        real_command.Add("");
+                    }
 
                     switch (real_command[0]) {
                         case "Install":
