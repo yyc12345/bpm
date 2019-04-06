@@ -4,12 +4,8 @@ A ~~*awful*~~ package manager for Ballance.
 
 ## Progress
 
-**Project-Slime** has been done. ~~リムル・テンペスト最高ですね~~
+**Project-alice-in-wonderland** has been done because I have solved the major issues of deploying.
 
-I start to deploy bpm. If I find any bugs when deploying bpm, I will fix it immediately. I start **Project-alice-in-wonderland** for this stage.
+**Project-ChickenFork** \(sto omniscient jx\) will seperate the bpm kernel and the user interface for multi-platform development. This is a hard work.
 
-## Screenshot
-
-A screenshot for previewing:
-
-![screenshot](screenshot.png)
+When I finish this project, you can see a clear construction of this repo. This repo have BPMServer and BPMKerner for the base and SharedLib for the communication. And BPMShamrock\(A Windows GUI client under .Net Framework 4 to adjust Ballance running environment.\) and BPMClover\(A cross-platform console app using .Net Core 2.x/3.x\) will use BPMKerner to implemen their function.
