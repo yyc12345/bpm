@@ -11,28 +11,25 @@ A ~~*awful*~~ package manager for Ballance.
 ## Planned project structure
 
 ```
-+----------------------------+           +--------------+           +-------------+
-|                            |  +----->  |              |  +------> |             |
-|   BallancePackageManager   |           |   ShareLib   |           |  BPMServer  |
-|                            |  <-----+  |              |  <------+ |             |
-+-----+----------------------+           +--------------+           +-------------+
-      |
-      |
-      |
-      +--------------------------------+
-      |                                |
-      |                                |
-      v                                v
-+-----+-------------+         +--------+----------+
-|                   |         |                   |
-|    BPMShamrock    |         |     BPMClover     |
-|                   |         |                   |
-+-------------------+         +-------------------+
+                                                   +-------------------+
+    +-----------+                                  | BPMScriptDebugger |
+    | BPMClover <---+                              +---------^---------+
+    +-----------+   |                                        |
+                    |                                        |
+  +-------------+   |   +------------------------+      +----+-----+      +-----------+
+  | BPMShamrock <-------+ BallancePackageManager <------+ ShareLib +------> BPMServer |
+  +-------------+   |   +------------------------+      +----------+      +-----------+
+                    |
++---------------+   |
+| BPMCornflower <---+
++---------------+
 
 ```
 
-* ShareLib: The shared lib between server and client core.
-* BPMServer: a .Net Core app.
+* ShareLib: The core lib which define some important and shared values and methods.
+* BPMServer: a .Net Core app. It distribute resources for each clients.
+* BPMScriptDebugger: a .Net Core app. It can hele you to test and debug your package script.
 * BallancePackageManager: The core of BPM client. It is under .Net Standard and can be loaded in any environment.
-* BPMShamrock: A WPF app. It is under .Net Framework 4.0, served for Windows platform especially for Windows XP \(Because of the running environment limitation of Ballance\).
+* BPMCornflower: A WPF app. It is served for Windows players and provides more fluent experience.
 * BPMClover: A .Net Core console app, served for multi-platform using. 
+* BPMShamrock: A .Net Core GUI app using Avalonia. Multi-platform app. **\(This project is postponed due to the CJK character render error.\)**
