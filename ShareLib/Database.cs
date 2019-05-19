@@ -13,28 +13,25 @@ using System.Linq;
 
 namespace ShareLib {
 
-    public class Database {
+    #region package database
 
-        public DatabaseDataContext PackageDatabaseDbContext { get; private set; }
-        public DatabaseDataContext InstalledDatabaseDbContext { get; private set; }
+    public class PackageDatabase {
+
+        public PackageDatabaseDataContext CoreDbContext { get; private set; }
 
         public void Open() {
-            PackageDatabaseDbContext = new DatabaseDataContext();
-            PackageDatabaseDbContext.Database.EnsureCreated();
-            InstalledDatabaseDbContext = new DatabaseDataContext();
-            InstalledDatabaseDbContext.Database.EnsureCreated();
+            CoreDbContext = new PackageDatabaseDataContext();
+            CoreDbContext.Database.EnsureCreated();
         }
 
         public void Close() {
-            PackageDatabaseDbContext.SaveChanges();
-            PackageDatabaseDbContext.Dispose();
-            InstalledDatabaseDbContext.SaveChanges();
-            InstalledDatabaseDbContext.Dispose();
+            CoreDbContext.SaveChanges();
+            CoreDbContext.Dispose();
         }
 
     }
 
-    public class DatabaseDataContext : DbContext {
+    public class PackageDatabaseDataContext : DbContext {
         public DbSet<PackageDatabaseTablePackageItem> package { get; set; }
         public DbSet<PackageDatabaseTableVersionItem> version { get; set; }
 
@@ -45,7 +42,8 @@ namespace ShareLib {
 
     [Table("package")]
     public class PackageDatabaseTablePackageItem {
-        [Key][Required]
+        [Key]
+        [Required]
         public string name { get; set; }
         public string aka { get; set; }
         [Required]
@@ -55,7 +53,8 @@ namespace ShareLib {
 
     [Table("version")]
     public class PackageDatabaseTableVersionItem {
-        [Key][Required]
+        [Key]
+        [Required]
         public string name { get; set; }
         [Required]
         public string parent { get; set; }
@@ -70,6 +69,34 @@ namespace ShareLib {
         public string conflict { get; set; }
     }
 
+    #endregion
+
+    #region installed database
+
+    public class InstalledDatabase {
+
+        public InstalledDatabaseDataContext CoreDbContext { get; private set; }
+
+        public void Open() {
+            CoreDbContext = new InstalledDatabaseDataContext();
+            CoreDbContext.Database.EnsureCreated();
+        }
+
+        public void Close() {
+            CoreDbContext.SaveChanges();
+            CoreDbContext.Dispose();
+        }
+
+    }
+
+    public class InstalledDatabaseDataContext : DbContext {
+        public DbSet<InstalledDatabaseTableInstalledItem> installed { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+            optionsBuilder.UseSqlite($"Data Source = {Information.WorkPath.Enter("installed.db").Path};");
+        }
+    }
+
     [Table("installed")]
     public class InstalledDatabaseTableInstalledItem {
         [Key]
@@ -79,4 +106,7 @@ namespace ShareLib {
         public int reference_count { get; set; }
         public string reference { get; set; }
     }
+
+    #endregion
+
 }
