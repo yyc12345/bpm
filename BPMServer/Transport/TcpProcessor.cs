@@ -129,9 +129,6 @@ namespace BPMServer {
                     case RemoteFileType.Package:
                         dataUrl = Information.WorkPath.Enter("package").Enter(packageName + ".zip").Path;
                         break;
-                    case RemoteFileType.PackageInfo:
-                        dataUrl = Information.WorkPath.Enter("dependency").Enter(packageName + ".json").Path;
-                        break;
                     case RemoteFileType.PackageDatabase:
                         dataUrl = Information.WorkPath.Enter("package.db").Path;
                         break;

@@ -35,8 +35,43 @@ namespace ShareLib {
         public DbSet<PackageDatabaseTablePackageItem> package { get; set; }
         public DbSet<PackageDatabaseTableVersionItem> version { get; set; }
 
+        /// <summary>
+        /// open database
+        /// </summary>
+        /// <param name="optionsBuilder"></param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseSqlite($"Data Source = {Information.WorkPath.Enter("package.db").Path};");
+        }
+
+        /// <summary>
+        /// set default value
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            //package table
+            modelBuilder.Entity<PackageDatabaseTablePackageItem>()
+                .Property(b => b.aka)
+                .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTablePackageItem>()
+                .Property(b => b.desc)
+                .HasDefaultValue(string.Empty);
+
+            //version table
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.additional_desc)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.additional_desc)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.dependency)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.conflict)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.internal_script)
+               .HasDefaultValue(string.Empty);
         }
     }
 
@@ -67,7 +102,11 @@ namespace ShareLib {
         [Required]
         public bool reverse_conflict { get; set; }
         public string conflict { get; set; }
+        [Required]
+        public bool require_decompress { get; set; }
         public string internal_script { get; set; }
+        [Required]
+        public string hash { get; set; }
     }
 
     #endregion
@@ -93,8 +132,26 @@ namespace ShareLib {
     public class InstalledDatabaseDataContext : DbContext {
         public DbSet<InstalledDatabaseTableInstalledItem> installed { get; set; }
 
+        /// <summary>
+        /// open database
+        /// </summary>
+        /// <param name="optionsBuilder"></param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseSqlite($"Data Source = {Information.WorkPath.Enter("installed.db").Path};");
+        }
+
+        /// <summary>
+        /// set default value
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            //package table
+            modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
+                .Property(b => b.reference)
+                .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
+                .Property(b => b.data)
+                .HasDefaultValue(string.Empty);
         }
     }
 
@@ -106,6 +163,7 @@ namespace ShareLib {
         [Required]
         public int reference_count { get; set; }
         public string reference { get; set; }
+        public string data { get; set; }
     }
 
     #endregion

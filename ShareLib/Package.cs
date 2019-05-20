@@ -48,4 +48,10 @@ namespace ShareLib {
         public static readonly int SOCKET_BUFFER_SIZE = 1024 * 1024;
     }
 
+    public static class DateTimeHelper {
+        public static long ToUNIXTimestamp(this DateTime t) {
+            return (t.Ticks - 621355968000000000) / 10000000;
+        }
+    }
+
 }

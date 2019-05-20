@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMScriptDebugger", "BPMScr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMServer", "BPMServer\BPMServer.csproj", "{91537B37-4CD0-406D-83DB-7F91C7678C02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMClover", "BPMClover\BPMClover.csproj", "{74F8A6B4-A5AE-4584-B162-F581B8CBE0D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMClover", "BPMClover\BPMClover.csproj", "{74F8A6B4-A5AE-4584-B162-F581B8CBE0D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

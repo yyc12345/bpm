@@ -20,7 +20,7 @@ namespace BPMServer {
         public static object lockList = new object();
 
         //maintain
-        public static Database GeneralDatabase = new Database();
+        public static PackageDatabase GeneralDatabase = new PackageDatabase();
 
     }
 }
