@@ -67,6 +67,7 @@ namespace ShareLib {
         [Required]
         public bool reverse_conflict { get; set; }
         public string conflict { get; set; }
+        public string internal_script { get; set; }
     }
 
     #endregion
