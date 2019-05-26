@@ -51,6 +51,14 @@ namespace ShareLib {
             fs.Dispose();
             return res;
         }
+
+        //Origin: https://stackoverflow.com/questions/13569406/how-should-i-compute-files-hashmd5-sha1-in-c-sharp
+        public static string GetFileHash(string file) {
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None)) {
+                SHA256Managed sha = new SHA256Managed();
+                return Convert.ToBase64String(sha.ComputeHash(stream));
+            }
+        }
     }
 
     //Origin: https://github.com/dotnet/corefx/issues/23686

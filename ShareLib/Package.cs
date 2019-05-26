@@ -46,6 +46,7 @@ namespace ShareLib {
         public static readonly int TRANSPORT_VER = 2;
         public static readonly int SEGMENT_LENGTH = 1024 * 512;
         public static readonly int SOCKET_BUFFER_SIZE = 1024 * 1024;
+        public static readonly int SIGNATURE_LENGTH = 256; //change this when change HASH method
     }
 
     public static class DateTimeHelper {

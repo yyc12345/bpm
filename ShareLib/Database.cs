@@ -50,27 +50,51 @@ namespace ShareLib {
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             //package table
             modelBuilder.Entity<PackageDatabaseTablePackageItem>()
+                .Property(b => b.name)
+                .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTablePackageItem>()
                 .Property(b => b.aka)
                 .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTablePackageItem>()
+                .Property(b => b.type)
+                .HasDefaultValue((int)PackageType.Miscellaneous);
             modelBuilder.Entity<PackageDatabaseTablePackageItem>()
                 .Property(b => b.desc)
                 .HasDefaultValue(string.Empty);
 
             //version table
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
-               .Property(b => b.additional_desc)
+               .Property(b => b.name)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.parent)
                .HasDefaultValue(string.Empty);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.additional_desc)
                .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.timestamp)
+               .HasDefaultValue(0);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.suit_os)
+               .HasDefaultValue((int)OSType.None);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.dependency)
                .HasDefaultValue(string.Empty);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.reverse_conflict)
+               .HasDefaultValue(false);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.conflict)
                .HasDefaultValue(string.Empty);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.require_decompress)
+               .HasDefaultValue(string.Empty);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.internal_script)
+               .HasDefaultValue(false);
+            modelBuilder.Entity<PackageDatabaseTableVersionItem>()
+               .Property(b => b.hash)
                .HasDefaultValue(string.Empty);
         }
     }
@@ -80,9 +104,11 @@ namespace ShareLib {
         [Key]
         [Required]
         public string name { get; set; }
+        [Required]
         public string aka { get; set; }
         [Required]
         public int type { get; set; }
+        [Required]
         public string desc { get; set; }
     }
 
@@ -93,18 +119,22 @@ namespace ShareLib {
         public string name { get; set; }
         [Required]
         public string parent { get; set; }
+        [Required]
         public string additional_desc { get; set; }
         [Required]
         public long timestamp { get; set; }
         [Required]
         public int suit_os { get; set; }
+        [Required]
         public string dependency { get; set; }
         [Required]
         public bool reverse_conflict { get; set; }
+        [Required]
         public string conflict { get; set; }
         [Required]
-        public bool require_decompress { get; set; }
-        public string internal_script { get; set; }
+        public string require_decompress { get; set; }
+        [Required]
+        public bool internal_script { get; set; }
         [Required]
         public string hash { get; set; }
     }
@@ -147,11 +177,18 @@ namespace ShareLib {
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             //package table
             modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
-                .Property(b => b.reference)
+                .Property(b => b.name)
                 .HasDefaultValue(string.Empty);
             modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
-                .Property(b => b.data)
+                .Property(b => b.reference_count)
+                .HasDefaultValue(0);
+            modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
+                .Property(b => b.reference)
                 .HasDefaultValue(string.Empty);
+            //todo: check a empty Dictionary's correct JSON string
+            modelBuilder.Entity<InstalledDatabaseTableInstalledItem>()
+                .Property(b => b.data)
+                .HasDefaultValue("{}");
         }
     }
 
@@ -162,7 +199,9 @@ namespace ShareLib {
         public string name { get; set; }
         [Required]
         public int reference_count { get; set; }
+        [Required]
         public string reference { get; set; }
+        [Required]
         public string data { get; set; }
     }
 

@@ -92,7 +92,7 @@ namespace BallancePackageManager {
             try {
                 //send
 
-                //Package & PacnageInfo
+                //Package
                 /*
                 DATA
 
@@ -119,7 +119,13 @@ namespace BallancePackageManager {
                 /*
                 DATA
 
-                Version is ok? | Verification Code | Package is existed? | Package Count | Package
+                    PackageDatabase
+
+                    Version is ok? | Verification Code | Package is existed? | Package Count | Sign is existed? | Sign
+
+                    Package
+
+                    Version is ok? | Verification Code | Package is existed? | Package Count
 
                 PACKAGE
 

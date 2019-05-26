@@ -42,8 +42,7 @@ namespace BPMServer {
                     General.GeneralOutput.Release();
                 }
             }
-
-            app_end:
+            
             ConsoleAssistance.WriteLine("Server exit!", ConsoleColor.Yellow);
             //Environment.Exit(0);
         }
