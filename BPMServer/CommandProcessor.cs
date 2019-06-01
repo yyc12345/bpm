@@ -16,7 +16,8 @@ namespace BPMServer.Command {
         });
 
         public static bool Process(string command) {
-            return parser.ParseArguments<ExitOption, ConfigOption, SwitchOption, ClientOption, ImportOption, LsOption, ShowOption, AddpkgOption, EditpkgOption, DelpkgOption, AddverOption, EditverOption, DelverOption>(
+
+            return parser.ParseArguments<ExitOption, ConfigOption, SwitchOption, ClientOption, ImportOption, LsOption, ShowOption, AddpkgOption, EditpkgOption, DelpkgOption, AddverOption, EditverOption, DelverOption, HelpOption>(
                 CommandSplitter.Split(command))
                 .MapResult(
                 (ExitOption opt) => {
@@ -58,6 +59,13 @@ namespace BPMServer.Command {
 
                     } else {
                         General.GeneralDatabase.Close();
+                        //force update verify code
+                        ConsoleAssistance.WriteLine("Updating verify code....", ConsoleColor.White);
+                        General.VerifyBytes = SignVerifyHelper.SignData(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("pri.key").Path);
+                        var config = Config.Read();
+                        config["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
+                        Config.Save(config);
+
                         General.CoreTcpProcessor.StartListen();
 
                         General.IsMaintaining = false;
@@ -71,7 +79,39 @@ namespace BPMServer.Command {
                     else ConsoleAssistance.WriteLine("Server is being maintained. There are no any client.", ConsoleColor.Red);
                     return false;
                 },
-                errs => { OutputHelp(); return false; });
+                (ImportOption opt) => {
+                    return false;
+                },
+                (LsOption opt) => {
+                    return false;
+                },
+                (ShowOption opt) => {
+                    return false;
+                },
+                (AddpkgOption opt) => {
+                    return false;
+                },
+                (EditpkgOption opt) => {
+                    return false;
+                },
+                (DelpkgOption opt) => {
+                    return false;
+                },
+                (AddverOption opt) => {
+                    return false;
+                },
+                (EditverOption opt) => {
+                    return false;
+                },
+                (DelverOption opt) => {
+                    return false;
+                },
+                (HelpOption opt) => {
+                    OutputHelp();
+                    return false;
+                }
+                errs => { ConsoleAssistance.WriteLine("Unknow command. Use help to find the correct command", ConsoleColor.Red); return false; });
+
         }
 
         static void OutputHelp() {
@@ -84,6 +124,7 @@ namespace BPMServer.Command {
             Console.WriteLine("\texit [-f] - exit server. if you choose -f switch, it will kill the server without any hesitation (for emergency). you will lost each of your modifications");
             Console.WriteLine("\tconfig [setting-name] [new-value] - edit server config(config will be applied in the next startup)");
             Console.WriteLine("\tswitch - switch server mode between maintain and running");
+            Console.WriteLine("\thelp - print this message");
             Console.WriteLine("");
             Console.WriteLine("Running mode command");
             Console.WriteLine("\tclient - list the number of client which is connecting this server");
@@ -95,8 +136,8 @@ namespace BPMServer.Command {
             Console.WriteLine("\taddpkg name aka type desc - add a new package");
             Console.WriteLine("\teditpkg name aka type desc - edit a package (use ~ to keep the original value)");
             Console.WriteLine("\tdelpkg name - remove a package");
-            Console.WriteLine("\taddver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - add a new version");
-            Console.WriteLine("\teditver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - edit a version (use ~ to keep the original value)");
+            Console.WriteLine("\taddver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - add a new version (use - to define current time)");
+            Console.WriteLine("\teditver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - edit a version (use - to define current time. use ~ to keep the original value)");
             Console.WriteLine("\tdelver name - remove a version");
             Console.WriteLine("");
             Console.WriteLine("Glory to BKT.");
@@ -237,6 +278,11 @@ namespace BPMServer.Command {
     public class DelverOption {
         [Value(0, Required = true)]
         public string Name { get; set; }
+    }
+
+    [Verb("help")]
+    public class HelpOption {
+
     }
 
     #endregion

@@ -22,5 +22,8 @@ namespace BPMServer {
         //maintain
         public static PackageDatabase GeneralDatabase = new PackageDatabase();
 
+        //verify
+        public static byte[] VerifyBytes;
+
     }
 }

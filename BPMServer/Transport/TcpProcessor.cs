@@ -143,7 +143,11 @@ namespace BPMServer {
                 } else client.Send(BitConverter.GetBytes(true), 0, 1, SocketFlags.None);
                 General.GeneralOutput.Add($"[{consoleOutput}] File is existed");
                 client.Send(BitConverter.GetBytes(res.blockCount), 0, 4, SocketFlags.None);
+                //if this is database, send check code
+                if (packageType == RemoteFileType.PackageDatabase)
+                    client.Send(General.VerifyBytes, 0, 256, SocketFlags.None);
 
+                //wait for each package inquire
                 data = new byte[4];
                 while (true) {
                     client.Receive(data, 0, 4, SocketFlags.None);

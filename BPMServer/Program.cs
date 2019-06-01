@@ -24,7 +24,6 @@ namespace BPMServer {
             var databasePath = Information.WorkPath.Enter("package.db").Path;
             var rsaPublic = Information.WorkPath.Enter("pub.key").Path;
             var rsaPrivate = Information.WorkPath.Enter("pri.key").Path;
-            var verifyCache= Information.WorkPath.Enter("verify.dat").Path
 
             //detect database
             if (!File.Exists(databasePath)) {
@@ -34,7 +33,7 @@ namespace BPMServer {
             }
 
             //detect encrypt file
-            if(!File.Exists(rsaPublic) || !File.Exists(rsaPrivate)) {
+            if (!File.Exists(rsaPublic) || !File.Exists(rsaPrivate)) {
                 //ensure there are no file.
                 ConsoleAssistance.WriteLine("No existing RSA key. A new RSA key will be created.", ConsoleColor.Yellow);
                 File.Delete(rsaPublic);
@@ -43,22 +42,31 @@ namespace BPMServer {
                 SignVerifyHelper.GenerateKey(rsaPublic, rsaPrivate);
             }
 
-            //detect database verify cache
-            if (!File.Exists(verifyCache)) {
-                ConsoleAssistance.WriteLine("No verify cache file. A new cache file will be created.", ConsoleColor.Yellow);
-
-                var str = Convert.ToBase64String(SignVerifyHelper.SignData(databasePath, rsaPublic));
-                File.WriteAllText(verifyCache, str);
-            }
-
             #endregion
 
+            //init config and file pool
             var config = Config.Read();
             General.CoreFileReader = new FileReaderManager();
             General.CoreTcpProcessor = new TcpProcessor(int.Parse(config["IPv4Port"]), int.Parse(config["IPv6Port"]));
-            General.CoreTcpProcessor.StartListen();
 
-            //read circle
+            //check parameter
+            if (args.Length != 0 && args[0] == "maintain") {
+                General.GeneralDatabase.Open();
+                General.IsMaintaining = true;
+                ConsoleAssistance.WriteLine("Start with maintain mode", ConsoleColor.Yellow);
+            } else {
+                //force update verify code
+                ConsoleAssistance.WriteLine("Updating verify code....", ConsoleColor.White);
+                General.VerifyBytes = SignVerifyHelper.SignData(databasePath, rsaPrivate);
+                config["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
+                Config.Save(config);
+
+                General.CoreTcpProcessor.StartListen();
+                General.IsMaintaining = false;
+                ConsoleAssistance.WriteLine("Start with running mode", ConsoleColor.Yellow);
+            }
+
+            //================================================read circle
             string command = "";
             while (true) {
                 if (Console.ReadKey(true).Key == ConsoleKey.Tab) {
@@ -67,12 +75,12 @@ namespace BPMServer {
 
                     command = Console.ReadLine();
                     if (CommandProcessor.Process(command)) break;
-                    
+
                     //re-output words
                     General.GeneralOutput.Release();
                 }
             }
-            
+
             ConsoleAssistance.WriteLine("Server exit!", ConsoleColor.Yellow);
             //Environment.Exit(0);
         }
