@@ -101,6 +101,13 @@ namespace ShareLib {
 
     [Table("package")]
     public class PackageDatabaseTablePackageItem {
+        public PackageDatabaseTablePackageItem() {
+            name = "";
+            aka = "";
+            type = (int)PackageType.Miscellaneous;
+            desc = "";
+        }
+
         [Key]
         [Required]
         public string name { get; set; }
@@ -114,6 +121,20 @@ namespace ShareLib {
 
     [Table("version")]
     public class PackageDatabaseTableVersionItem {
+        public PackageDatabaseTableVersionItem() {
+            name = "";
+            parent = "";
+            additional_desc = "";
+            timestamp = 0;
+            suit_os = (int)OSType.None;
+            dependency = "";
+            reverse_conflict = false;
+            conflict = "";
+            require_decompress = "";
+            internal_script = false;
+            hash = "";
+        }
+
         [Key]
         [Required]
         public string name { get; set; }
@@ -194,6 +215,13 @@ namespace ShareLib {
 
     [Table("installed")]
     public class InstalledDatabaseTableInstalledItem {
+        public InstalledDatabaseTableInstalledItem() {
+            name = "";
+            reference = "";
+            reference_count = 0;
+            data = "";
+        }
+
         [Key]
         [Required]
         public string name { get; set; }

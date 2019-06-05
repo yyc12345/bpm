@@ -16,120 +16,282 @@ namespace BPMServer {
 
     public static class PackageManager {
 
-        public static void AddPackage(Database packageDbConn, string name, string aka, string type, string version, string desc, string package_file_path, string dependency_file_path) {
+        public static void Ls(PackageDatabase packageDbConn, string limit) {
+            if (limit == "") {
+                foreach (var item in packageDbConn.CoreDbContext.package)
+                    Console.WriteLine(item.name);
+            } else {
+                var reader = from it in packageDbConn.CoreDbContext.package
+                             where it.name == limit
+                             select it;
+                if (!reader.Any()) {
+                    ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
+                    return;
+                }
 
-            var reader = packageDbConn.CoreDbContext.package
-                .Where(x => x.name == name)
-                .ToList();
+                var item = reader.First();
+                ConsoleAssistance.WriteLine(item.name, ConsoleColor.Yellow);
+                Console.WriteLine($"aka: {item.aka}");
+                Console.WriteLine($"type: {item.type}");
+                Console.WriteLine($"desc: {item.desc}");
+                Console.WriteLine("all version:");
+
+                var reader2 = from it2 in packageDbConn.CoreDbContext.version
+                              where it2.parent == limit
+                              select it2;
+                foreach (var item2 in reader2)
+                    Console.WriteLine($"\t{item2.name}");
+
+            }
+        }
+
+        public static void Show(PackageDatabase packageDbConn, string name) {
+
+            var reader = from it in packageDbConn.CoreDbContext.version
+                         where it.name == name
+                         select it;
+            if (!reader.Any()) {
+                ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
+                return;
+            }
+
+            ConsoleAssistance.WriteLine(name, ConsoleColor.Yellow);
+            var item = reader.First();
+
+            Console.WriteLine($"parent: {item.parent}");
+            Console.WriteLine($"additional desc: {item.additional_desc}");
+            Console.WriteLine($"timestamp: {item.timestamp}");
+            Console.WriteLine($"suit os: Windows [{(OSType.Windows == ((OSType)item.suit_os & OSType.Windows) ? "X" : " ")}], UNIX [{(OSType.Unix == ((OSType)item.suit_os & OSType.Unix) ? "X" : " ")}], macOS [{(OSType.macOS == ((OSType)item.suit_os & OSType.macOS) ? "X" : " ")}]");
+            Console.WriteLine($"dependency: {item.dependency}");
+            Console.WriteLine($"reverse conflict: {item.reverse_conflict}");
+            Console.WriteLine($"conflict: {item.conflict}");
+            Console.WriteLine($"require decompress: {item.require_decompress}");
+            Console.WriteLine($"internal script: {item.internal_script}");
+            Console.WriteLine($"hash: {item.hash}");
+
+        }
+
+        public static void AddPackage(PackageDatabase packageDbConn, Command.AddpkgOption data) {
+
+            var reader = from item in packageDbConn.CoreDbContext.package
+                         where item.name == data.Name
+                         select item;
             if (reader.Any()) {
-                ConsoleAssistance.WriteLine("Existed package. Please use addver to add package.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine("Existed package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            var newObj = new DatabaseItem();
-            newObj.name = name;
-            newObj.aka = aka;
-            newObj.type = int.Parse(type);
-            newObj.version = version;
-            newObj.desc = desc;
-            packageDbConn.CoreDbContext.package.Add(newObj);
+            var newObj = data.ToDatabaseFormat();
+            if (newObj.status) {
+                packageDbConn.CoreDbContext.package.Add(newObj.res);
+                ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
+            } else ConsoleAssistance.WriteLine("Illegal parameter", ConsoleColor.Red);
 
-            //copy file
-            File.Copy(package_file_path, Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
-            File.Copy(dependency_file_path, Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
-
-            ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void AddVersion(Database packageDbConn, string name, string version, string package_file_path, string dependency_file_path) {
+        public static void AddVersion(PackageDatabase packageDbConn, Command.AddverOption data) {
 
-            var reader = (from item in packageDbConn.CoreDbContext.package
-                          where item.name == name
-                          select item).ToList();
-            if (!reader.Any()) {
-                ConsoleAssistance.WriteLine("Lost package. Please use addpkg to add package.", ConsoleColor.Red);
+            //check exist
+            var reader = from item in packageDbConn.CoreDbContext.version
+                         where item.name == data.Name
+                         select item;
+            if (reader.Any()) {
+                ConsoleAssistance.WriteLine("Existed package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            var versionList = reader[0].version.Split(',');
-            if (versionList.Contains(version)) {
-                ConsoleAssistance.WriteLine("Existed version.", ConsoleColor.Red);
+            var newObj = data.ToDatabaseFormat();
+            if (newObj.status) {
+                //update database
+                packageDbConn.CoreDbContext.version.Add(newObj.res);
+                //copy package
+                File.Copy(data.PackagePath, Information.WorkPath.Enter("package").Enter($"{data.Name}.zip").Path);
+
+                ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
+            } else ConsoleAssistance.WriteLine("Illegal parameter", ConsoleColor.Red);
+        }
+
+        public static void EditPackage(PackageDatabase packageDbConn, Command.EditpkgOption data) {
+            var reader = from item in packageDbConn.CoreDbContext.package
+                         where item.name == data.Name
+                         select item;
+            if (!reader.Any()) {
+                ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
                 return;
             }
 
-            var newData = String.Join(",", versionList) + $",{version}";
-
-            reader[0].version = newData;
-
-            //copy file
-            File.Copy(package_file_path, Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
-            File.Copy(dependency_file_path, Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
-
-            ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
+            var got = reader.First();
+            var newObj = data.ToDatabaseFormat(got);
+            if (newObj.status) {
+                packageDbConn.CoreDbContext.package.Remove(got);
+                packageDbConn.CoreDbContext.package.Add(newObj.res);
+                ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
+            } else ConsoleAssistance.WriteLine("Illegal parameter", ConsoleColor.Red);
         }
 
-        public static void RemovePackage(Database packageDbConn, string name) {
-
-            var reader = (from item in packageDbConn.CoreDbContext.package
-                          where item.name == name
-                          select item).ToList();
+        public static void EditVersion(PackageDatabase packageDbConn, Command.EditverOption data) {
+            var reader = from item in packageDbConn.CoreDbContext.version
+                         where item.name == data.Name
+                         select item;
             if (!reader.Any()) {
-                ConsoleAssistance.WriteLine("Lost package. Check out your package name.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
+                return;
+            }
+
+            var got = reader.First();
+            var newObj = data.ToDatabaseFormat(got);
+            if (newObj.status) {
+                packageDbConn.CoreDbContext.version.Remove(got);
+                packageDbConn.CoreDbContext.version.Add(newObj.res);
+
+                //copy file
+                if (data.PackagePath != "~") {
+                    File.Delete(Information.WorkPath.Enter("package").Enter($"{data.Name}.zip").Path);
+                    File.Copy(data.PackagePath, Information.WorkPath.Enter("package").Enter($"{data.Name}.zip").Path);
+                }
+                ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
+            } else ConsoleAssistance.WriteLine("Illegal parameter", ConsoleColor.Red);
+        }
+
+        public static void RemovePackage(PackageDatabase packageDbConn, string name) {
+
+            //remove from package table
+            var reader = from item in packageDbConn.CoreDbContext.package
+                         where item.name == name
+                         select item;
+            if (!reader.Any()) {
+                ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
             packageDbConn.CoreDbContext.package.RemoveRange(reader);
 
-            //del file
-            var folder1 = new DirectoryInfo(Information.WorkPath.Enter("package").Path);
-            foreach (var item in folder1.GetFiles($"{name}@*.zip")) {
-                File.Delete(item.FullName);
-            }
-            folder1 = new DirectoryInfo(Information.WorkPath.Enter("dependency").Path);
-            foreach (var item in folder1.GetFiles($"{name}@*.json")) {
-                File.Delete(item.FullName);
+            //remove all version
+            var reader2 = from item in packageDbConn.CoreDbContext.version
+                          where item.parent == name
+                          select item;
+            foreach (var item in reader2) {
+                //remove file and database
+                File.Delete(Information.WorkPath.Enter("package").Enter($"{item.name}.zip").Path);
+                packageDbConn.CoreDbContext.version.Remove(item);
             }
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
-        public static void RemoveVersion(Database packageDbConn, string name, string version) {
+        public static void RemoveVersion(PackageDatabase packageDbConn, string name) {
 
-            var reader = (from item in packageDbConn.CoreDbContext.package
-                          where item.name == name
-                          select item).ToList();
+            var reader = from item in packageDbConn.CoreDbContext.version
+                         where item.name == name
+                         select item;
             if (!reader.Any()) {
-                ConsoleAssistance.WriteLine("Lost package. Check out your package name.", ConsoleColor.Red);
+                ConsoleAssistance.WriteLine("Lost package.", ConsoleColor.Red);
                 return;
             }
 
             //set database
-            var versionList = new List<string>(reader[0].version.Split(','));
-            if (!versionList.Contains(version)) {
-                ConsoleAssistance.WriteLine("No matched version.", ConsoleColor.Red);
-                return;
-            }
-
-            versionList.Remove(version);
-            if (versionList.Count == 0) {
-                ConsoleAssistance.WriteLine("This is this package's last version. Please use delpkg to remove it.", ConsoleColor.Red);
-                return;
-            }
-
-            var newData = String.Join(",", versionList);
-
-            reader[0].version = newData;
+            packageDbConn.CoreDbContext.version.RemoveRange(reader);
 
             //del file
-            File.Delete(Information.WorkPath.Enter("package").Enter($"{name}@{version}.zip").Path);
-            File.Delete(Information.WorkPath.Enter("dependency").Enter($"{name}@{version}.json").Path);
+            File.Delete(Information.WorkPath.Enter("package").Enter($"{name}.zip").Path);
 
             ConsoleAssistance.WriteLine("Operation done.", ConsoleColor.Yellow);
         }
 
     }
+
+    /// <summary>
+    /// the helper for convert command to database structure
+    /// </summary>
+    public static class CommandOptionHelper {
+
+        public static (PackageDatabaseTablePackageItem res, bool status) ToDatabaseFormat(this Command.AddpkgOption ori) {
+            var obj = new PackageDatabaseTablePackageItem() {
+                name = ori.Name,
+                aka = ori.Aka,
+                desc = ori.Desc
+            };
+
+            try {
+                obj.type = int.Parse(ori.Type);
+            } catch {
+                return (obj, false);
+            }
+
+            return (obj, true);
+        }
+
+        public static (PackageDatabaseTablePackageItem res, bool status) ToDatabaseFormat(this Command.EditpkgOption ori, PackageDatabaseTablePackageItem item) {
+            var obj = new PackageDatabaseTablePackageItem() {
+                name = ori.Name == "~" ? item.name : ori.Name,
+                aka = ori.Aka == "~" ? item.aka : ori.Aka,
+                desc = ori.Desc == "~" ? item.desc : ori.Desc
+            };
+
+            try {
+                obj.type = ori.Type == "~" ? item.type : int.Parse(ori.Type);
+            } catch {
+                return (obj, false);
+            }
+
+            return (obj, true);
+        }
+
+        public static (PackageDatabaseTableVersionItem res, bool status) ToDatabaseFormat(this Command.AddverOption ori) {
+            var obj = new PackageDatabaseTableVersionItem() {
+                name = ori.Name,
+                parent = ori.Parent,
+                additional_desc = ori.AdditionalDesc,
+                dependency = ori.Dependency,
+                conflict = ori.Conflict,
+                require_decompress = ori.RequireDecompress,
+                hash = SignVerifyHelper.GetFileHash(ori.PackagePath)
+            };
+
+            try {
+                if (ori.Timestamp == "+") obj.timestamp = DateTime.Now.ToUNIXTimestamp();
+                else obj.timestamp = long.Parse(ori.Timestamp);
+
+                obj.suit_os = int.Parse(ori.SuitOS);
+                obj.reverse_conflict = bool.Parse(ori.ReverseConflict);
+                obj.internal_script = bool.Parse(ori.ReverseConflict);
+            } catch {
+                return (obj, false);
+            }
+
+            return (obj, true);
+        }
+
+        public static (PackageDatabaseTableVersionItem res, bool status) ToDatabaseFormat(this Command.EditverOption ori, PackageDatabaseTableVersionItem item) {
+            var obj = new PackageDatabaseTableVersionItem() {
+                name = ori.Name == "~" ? item.name : ori.Name,
+                parent = ori.Parent == "~" ? item.parent : ori.Parent,
+                additional_desc = ori.AdditionalDesc == "~" ? item.additional_desc : ori.AdditionalDesc,
+                dependency = ori.Dependency == "~" ? item.dependency : ori.Dependency,
+                conflict = ori.Conflict == "~" ? item.conflict : ori.Conflict,
+                require_decompress = ori.RequireDecompress == "~" ? item.require_decompress : ori.RequireDecompress,
+                hash = ori.PackagePath == "~" ? item.hash : SignVerifyHelper.GetFileHash(ori.PackagePath)
+            };
+
+            try {
+                if (ori.Timestamp == "+") obj.timestamp = DateTime.Now.ToUNIXTimestamp();
+                else if (ori.Timestamp == "~") obj.timestamp = item.timestamp;
+                else obj.timestamp = long.Parse(ori.Timestamp);
+
+                obj.suit_os = ori.SuitOS == "~" ? item.suit_os : int.Parse(ori.SuitOS);
+                obj.reverse_conflict = ori.ReverseConflict == "~" ? item.reverse_conflict : bool.Parse(ori.ReverseConflict);
+                obj.internal_script = ori.InternalScript == "~" ? item.internal_script : bool.Parse(ori.ReverseConflict);
+            } catch {
+                return (obj, false);
+            }
+
+            return (obj, true);
+        }
+
+    }
+
 
 }

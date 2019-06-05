@@ -30,7 +30,7 @@ namespace BPMServer.Command {
                             if (General.ManualResetEventList.Count != 0)
                                 WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                         } else General.GeneralDatabase.Close();
-                        return false;
+                        return true;
                     }
 
                 },
@@ -83,33 +83,42 @@ namespace BPMServer.Command {
                     return false;
                 },
                 (LsOption opt) => {
+                    if (opt.Condition is null) PackageManager.Ls(General.GeneralDatabase, "");
+                    else PackageManager.Ls(General.GeneralDatabase, opt.Condition);
                     return false;
                 },
                 (ShowOption opt) => {
+                    PackageManager.Show(General.GeneralDatabase, opt.FullPackageName);
                     return false;
                 },
                 (AddpkgOption opt) => {
+                    PackageManager.AddPackage(General.GeneralDatabase, opt);
                     return false;
                 },
                 (EditpkgOption opt) => {
+                    PackageManager.EditPackage(General.GeneralDatabase, opt);
                     return false;
                 },
                 (DelpkgOption opt) => {
+                    PackageManager.RemovePackage(General.GeneralDatabase, opt.Name);
                     return false;
                 },
                 (AddverOption opt) => {
+                    PackageManager.AddVersion(General.GeneralDatabase, opt);
                     return false;
                 },
                 (EditverOption opt) => {
+                    PackageManager.EditVersion(General.GeneralDatabase, opt);
                     return false;
                 },
                 (DelverOption opt) => {
+                    PackageManager.RemoveVersion(General.GeneralDatabase, opt.Name);
                     return false;
                 },
                 (HelpOption opt) => {
                     OutputHelp();
                     return false;
-                }
+                },
                 errs => { ConsoleAssistance.WriteLine("Unknow command. Use help to find the correct command", ConsoleColor.Red); return false; });
 
         }
@@ -195,7 +204,7 @@ namespace BPMServer.Command {
         [Value(1, Required = true)]
         public string Aka { get; set; }
         [Value(2, Required = true)]
-        public int Type { get; set; }
+        public string Type { get; set; }
         [Value(3, Required = true)]
         public string Desc { get; set; }
     }
@@ -207,9 +216,11 @@ namespace BPMServer.Command {
         [Value(1, Required = true)]
         public string Aka { get; set; }
         [Value(2, Required = true)]
-        public int Type { get; set; }
+        public string Type { get; set; }
         [Value(3, Required = true)]
         public string Desc { get; set; }
+
+        
     }
 
     [Verb("delpkg")]
@@ -227,9 +238,9 @@ namespace BPMServer.Command {
         [Value(2, Required = true)]
         public string AdditionalDesc { get; set; }
         [Value(3, Required = true)]
-        public long Timestamp { get; set; }
+        public string Timestamp { get; set; }
         [Value(4, Required = true)]
-        public int SuitOS { get; set; }
+        public string SuitOS { get; set; }
         [Value(5, Required = true)]
         public string Dependency { get; set; }
         [Value(6, Required = true)]
@@ -240,10 +251,13 @@ namespace BPMServer.Command {
         public string RequireDecompress { get; set; }
         [Value(9, Required = true)]
         public string InternalScript { get; set; }
+        //hash will automatically detect
+        //[Value(10, Required = true)]
+        //public string HASH { get; set; }
         [Value(10, Required = true)]
-        public string HASH { get; set; }
-        [Value(11, Required = true)]
         public string PackagePath { get; set; }
+
+        
     }
 
     [Verb("editver")]
@@ -255,9 +269,9 @@ namespace BPMServer.Command {
         [Value(2, Required = true)]
         public string AdditionalDesc { get; set; }
         [Value(3, Required = true)]
-        public long Timestamp { get; set; }
+        public string Timestamp { get; set; }
         [Value(4, Required = true)]
-        public int SuitOS { get; set; }
+        public string SuitOS { get; set; }
         [Value(5, Required = true)]
         public string Dependency { get; set; }
         [Value(6, Required = true)]
@@ -268,10 +282,12 @@ namespace BPMServer.Command {
         public string RequireDecompress { get; set; }
         [Value(9, Required = true)]
         public string InternalScript { get; set; }
+        //hash will automatically detect
+        //[Value(10, Required = true)]
+        //public string HASH { get; set; }
         [Value(10, Required = true)]
-        public string HASH { get; set; }
-        [Value(11, Required = true)]
         public string PackagePath { get; set; }
+
     }
 
     [Verb("delpkg")]
