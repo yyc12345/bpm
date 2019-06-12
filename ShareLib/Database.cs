@@ -57,7 +57,7 @@ namespace ShareLib {
                 .HasDefaultValue(string.Empty);
             modelBuilder.Entity<PackageDatabaseTablePackageItem>()
                 .Property(b => b.type)
-                .HasDefaultValue((int)PackageType.Miscellaneous);
+                .HasDefaultValue(PackageType.Miscellaneous);
             modelBuilder.Entity<PackageDatabaseTablePackageItem>()
                 .Property(b => b.desc)
                 .HasDefaultValue(string.Empty);
@@ -77,7 +77,7 @@ namespace ShareLib {
                .HasDefaultValue(0);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.suit_os)
-               .HasDefaultValue((int)OSType.None);
+               .HasDefaultValue(OSType.None);
             modelBuilder.Entity<PackageDatabaseTableVersionItem>()
                .Property(b => b.dependency)
                .HasDefaultValue(string.Empty);
@@ -104,7 +104,7 @@ namespace ShareLib {
         public PackageDatabaseTablePackageItem() {
             name = "";
             aka = "";
-            type = (int)PackageType.Miscellaneous;
+            type = PackageType.Miscellaneous;
             desc = "";
         }
 
@@ -114,7 +114,7 @@ namespace ShareLib {
         [Required]
         public string aka { get; set; }
         [Required]
-        public int type { get; set; }
+        public PackageType type { get; set; }
         [Required]
         public string desc { get; set; }
     }
@@ -126,7 +126,7 @@ namespace ShareLib {
             parent = "";
             additional_desc = "";
             timestamp = 0;
-            suit_os = (int)OSType.None;
+            suit_os = OSType.None;
             dependency = "";
             reverse_conflict = false;
             conflict = "";
@@ -145,7 +145,7 @@ namespace ShareLib {
         [Required]
         public long timestamp { get; set; }
         [Required]
-        public int suit_os { get; set; }
+        public OSType suit_os { get; set; }
         [Required]
         public string dependency { get; set; }
         [Required]

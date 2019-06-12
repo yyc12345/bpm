@@ -62,7 +62,7 @@ namespace BPMServer {
                 while (true) {
                     try {
                         Socket client = s.Accept();
-                        General.GeneralOutput.Add($"Receive {client.RemoteEndPoint.ToString()} connection");
+                        General.RecordFileManager.WriteNewRecord($"Receive {client.RemoteEndPoint.ToString()} connection");
                         ManualResetEvent mre = new ManualResetEvent(false);
                         lock (General.lockList) {
                             General.ManualResetEventList.Add(mre);
@@ -93,25 +93,25 @@ namespace BPMServer {
                 //byte[] send_data;
                 client.Receive(data, 0, 4, SocketFlags.None);
                 if (BitConverter.ToInt32(data, 0) != Transport.SIGN) goto end; //invalid code
-                General.GeneralOutput.Add($"[{consoleOutput}] SIGN pass");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] SIGN pass");
                 client.Receive(data, 0, 4, SocketFlags.None);
                 if (BitConverter.ToInt32(data, 0) != Transport.TRANSPORT_VER) {
                     //outdated version
                     client.Send(BitConverter.GetBytes(false), 0, 1, SocketFlags.None);
                     goto end;
                 } else client.Send(BitConverter.GetBytes(true), 0, 1, SocketFlags.None);
-                General.GeneralOutput.Add($"[{consoleOutput}] TRANSPORT_VER pass");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] TRANSPORT_VER pass");
                 //verfication code
                 //int verificationCode;
                 client.Receive(data, 0, 4, SocketFlags.None);
                 //verificationCode = BitConverter.ToInt32(data, 0);
                 client.Send(data, 0, 4, SocketFlags.None);
-                General.GeneralOutput.Add($"[{consoleOutput}] Verfication OK");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] Verfication OK");
                 //package type
                 RemoteFileType packageType;
                 client.Receive(data, 0, 4, SocketFlags.None);
                 packageType = (RemoteFileType)BitConverter.ToInt32(data, 0);
-                General.GeneralOutput.Add($"[{consoleOutput}] Package type {packageType.ToString()}");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] Package type {packageType.ToString()}");
 
                 string packageName = "";
                 //package name
@@ -122,7 +122,7 @@ namespace BPMServer {
                     client.Receive(data, 0, nameLength, SocketFlags.None);
                     packageName = Encoding.UTF8.GetString(data);
                 }
-                General.GeneralOutput.Add($"[{consoleOutput}] Package name {packageName}");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] Package name {packageName}");
 
                 string dataUrl = "";
                 switch (packageType) {
@@ -141,7 +141,7 @@ namespace BPMServer {
                     client.Send(BitConverter.GetBytes(false), 0, 1, SocketFlags.None);
                     goto end;
                 } else client.Send(BitConverter.GetBytes(true), 0, 1, SocketFlags.None);
-                General.GeneralOutput.Add($"[{consoleOutput}] File is existed");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] File is existed");
                 client.Send(BitConverter.GetBytes(res.blockCount), 0, 4, SocketFlags.None);
                 //if this is database, send check code
                 if (packageType == RemoteFileType.PackageDatabase)
@@ -153,21 +153,21 @@ namespace BPMServer {
                     client.Receive(data, 0, 4, SocketFlags.None);
                     var getIndex = BitConverter.ToInt32(data, 0);
                     if (getIndex <= 0 || getIndex > res.blockCount) break;
-                    General.GeneralOutput.Add($"[{consoleOutput}] Request new segment of package. Index: {getIndex}");
+                    General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] Request new segment of package. Index: {getIndex}");
                     var cache = General.CoreFileReader.Read(dataUrl, getIndex);
                     client.Send(BitConverter.GetBytes(cache.Length), 0, 4, SocketFlags.None);
                     client.Send(cache, 0, cache.Length, SocketFlags.None);
                 }
 
                 General.CoreFileReader.RemoveFile(dataUrl);
-                General.GeneralOutput.Add($"[{consoleOutput}] File send OK");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] File send OK");
             } catch (Exception e) {
-                General.GeneralOutput.Add($"[{consoleOutput}] A error was raised when communicate with client: {e.Message}");
+                General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] A error was raised when communicate with client: {e.Message}");
                 //pass
             }
 
             end:
-            General.GeneralOutput.Add($"[{consoleOutput}] Communication end!");
+            General.RecordFileManager.WriteNewRecord($"[{consoleOutput}] Communication end!");
             client.Close();
 
             //release flag

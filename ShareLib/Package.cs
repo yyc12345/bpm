@@ -53,6 +53,11 @@ namespace ShareLib {
         public static long ToUNIXTimestamp(this DateTime t) {
             return (t.Ticks - 621355968000000000) / 10000000;
         }
+
+        public static DateTime ToDateTime(this long unixTimestamp) {
+            return new DateTime(unixTimestamp * 10000000 + 621355968000000000);
+        }
     }
+
 
 }

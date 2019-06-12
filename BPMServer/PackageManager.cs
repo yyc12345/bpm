@@ -32,7 +32,7 @@ namespace BPMServer {
                 var item = reader.First();
                 ConsoleAssistance.WriteLine(item.name, ConsoleColor.Yellow);
                 Console.WriteLine($"aka: {item.aka}");
-                Console.WriteLine($"type: {item.type}");
+                Console.WriteLine($"type: {item.type} ({((PackageType)item.type).ToString()})");
                 Console.WriteLine($"desc: {item.desc}");
                 Console.WriteLine("all version:");
 
@@ -60,7 +60,7 @@ namespace BPMServer {
 
             Console.WriteLine($"parent: {item.parent}");
             Console.WriteLine($"additional desc: {item.additional_desc}");
-            Console.WriteLine($"timestamp: {item.timestamp}");
+            Console.WriteLine($"timestamp: {item.timestamp} ({item.timestamp.ToDateTime().ToString()})");
             Console.WriteLine($"suit os: Windows [{(OSType.Windows == ((OSType)item.suit_os & OSType.Windows) ? "X" : " ")}], UNIX [{(OSType.Unix == ((OSType)item.suit_os & OSType.Unix) ? "X" : " ")}], macOS [{(OSType.macOS == ((OSType)item.suit_os & OSType.macOS) ? "X" : " ")}]");
             Console.WriteLine($"dependency: {item.dependency}");
             Console.WriteLine($"reverse conflict: {item.reverse_conflict}");
@@ -216,7 +216,7 @@ namespace BPMServer {
             };
 
             try {
-                obj.type = int.Parse(ori.Type);
+                obj.type = (PackageType)(int.Parse(ori.Type));
             } catch {
                 return (obj, false);
             }
@@ -232,7 +232,7 @@ namespace BPMServer {
             };
 
             try {
-                obj.type = ori.Type == "~" ? item.type : int.Parse(ori.Type);
+                obj.type = ori.Type == "~" ? item.type : (PackageType)(int.Parse(ori.Type));
             } catch {
                 return (obj, false);
             }
@@ -255,7 +255,7 @@ namespace BPMServer {
                 if (ori.Timestamp == "+") obj.timestamp = DateTime.Now.ToUNIXTimestamp();
                 else obj.timestamp = long.Parse(ori.Timestamp);
 
-                obj.suit_os = int.Parse(ori.SuitOS);
+                obj.suit_os = (OSType)(int.Parse(ori.SuitOS));
                 obj.reverse_conflict = bool.Parse(ori.ReverseConflict);
                 obj.internal_script = bool.Parse(ori.ReverseConflict);
             } catch {
@@ -281,7 +281,7 @@ namespace BPMServer {
                 else if (ori.Timestamp == "~") obj.timestamp = item.timestamp;
                 else obj.timestamp = long.Parse(ori.Timestamp);
 
-                obj.suit_os = ori.SuitOS == "~" ? item.suit_os : int.Parse(ori.SuitOS);
+                obj.suit_os = ori.SuitOS == "~" ? item.suit_os : (OSType)(int.Parse(ori.SuitOS));
                 obj.reverse_conflict = ori.ReverseConflict == "~" ? item.reverse_conflict : bool.Parse(ori.ReverseConflict);
                 obj.internal_script = ori.InternalScript == "~" ? item.internal_script : bool.Parse(ori.ReverseConflict);
             } catch {

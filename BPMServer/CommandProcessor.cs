@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using CommandLine;
@@ -30,18 +31,29 @@ namespace BPMServer.Command {
                             if (General.ManualResetEventList.Count != 0)
                                 WaitHandle.WaitAll(General.ManualResetEventList.ToArray());
                         } else General.GeneralDatabase.Close();
+
+                        General.RecordFileManager.Close();
                         return true;
                     }
 
                 },
                 (ConfigOption opt) => {
                     if (opt.Key is null)
-                        Config.Core();
-                    else {
+                        foreach (var item in General.ConfigManager.Configuration.Keys) {
+                            Console.Write($"{item}: ");
+                            Console.Write($"{General.ConfigManager.Configuration[item]}\n");
+                        } else {
                         if (opt.NewValue is null)
-                            Config.Core(opt.Key);
-                        else
-                            Config.Core(opt.Key, opt.NewValue);
+                            if (General.ConfigManager.Configuration.Keys.Contains(opt.Key))
+                                Console.WriteLine(General.ConfigManager.Configuration[opt.Key]);
+                            else {
+                                if (General.ConfigManager.Configuration.Keys.Contains(opt.Key)) {
+                                    General.ConfigManager.Configuration[opt.Key] = opt.NewValue;
+                                    General.ConfigManager.Save();
+                                    Console.WriteLine("New value has been applied");
+                                }
+                            }
+
                     }
                     return false;
                 },
@@ -62,9 +74,8 @@ namespace BPMServer.Command {
                         //force update verify code
                         ConsoleAssistance.WriteLine("Updating verify code....", ConsoleColor.White);
                         General.VerifyBytes = SignVerifyHelper.SignData(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("pri.key").Path);
-                        var config = Config.Read();
-                        config["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
-                        Config.Save(config);
+                        General.ConfigManager.Configuration["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
+                        General.ConfigManager.Save();
 
                         General.CoreTcpProcessor.StartListen();
 
@@ -75,43 +86,62 @@ namespace BPMServer.Command {
                     return false;
                 },
                 (ClientOption opt) => {
-                    if (!General.IsMaintaining) ConsoleAssistance.WriteLine($"Current client: {General.ManualResetEventList.Count}", ConsoleColor.Yellow);
-                    else ConsoleAssistance.WriteLine("Server is being maintained. There are no any client.", ConsoleColor.Red);
+                    if (!CheckStatus(false)) return false;
+
+                    ConsoleAssistance.WriteLine($"Current client: {General.ManualResetEventList.Count}", ConsoleColor.Yellow);
                     return false;
                 },
                 (ImportOption opt) => {
+                    if (!CheckStatus(true)) return false;
+
+                    ConsoleAssistance.WriteLine("import is a dangerous command. It will load all script and run it without any error judgement! It couldn't be stopped before all of commands has been executed!", ConsoleColor.Yellow);
+                    var confirm = new Random().Next(100, 9999);
+                    ConsoleAssistance.WriteLine($"Type this random number to confirm your operation: {confirm}", ConsoleColor.Yellow);
+                    if (Console.ReadLine() == confirm.ToString()) {
+                        if (System.IO.File.Exists(opt.FilePath)) ImportStack.AppendImportedCommands(opt.FilePath);
+                        else ConsoleAssistance.WriteLine("Cannot find specific file", ConsoleColor.Red);
+                    }
                     return false;
                 },
                 (LsOption opt) => {
+                    if (!CheckStatus(true)) return false;
+
                     if (opt.Condition is null) PackageManager.Ls(General.GeneralDatabase, "");
                     else PackageManager.Ls(General.GeneralDatabase, opt.Condition);
                     return false;
                 },
                 (ShowOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.Show(General.GeneralDatabase, opt.FullPackageName);
                     return false;
                 },
                 (AddpkgOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.AddPackage(General.GeneralDatabase, opt);
                     return false;
                 },
                 (EditpkgOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.EditPackage(General.GeneralDatabase, opt);
                     return false;
                 },
                 (DelpkgOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.RemovePackage(General.GeneralDatabase, opt.Name);
                     return false;
                 },
                 (AddverOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.AddVersion(General.GeneralDatabase, opt);
                     return false;
                 },
                 (EditverOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.EditVersion(General.GeneralDatabase, opt);
                     return false;
                 },
                 (DelverOption opt) => {
+                    if (!CheckStatus(true)) return false;
                     PackageManager.RemoveVersion(General.GeneralDatabase, opt.Name);
                     return false;
                 },
@@ -121,6 +151,21 @@ namespace BPMServer.Command {
                 },
                 errs => { ConsoleAssistance.WriteLine("Unknow command. Use help to find the correct command", ConsoleColor.Red); return false; });
 
+        }
+
+        static bool CheckStatus(bool isCheckMaintain) {
+            if (isCheckMaintain) {
+                if (General.IsMaintaining) return true;
+                else {
+                    ConsoleAssistance.WriteLine("This command is illegal in current status.", ConsoleColor.Red);
+                    return false;
+                }
+            } else {
+                if (General.IsMaintaining) {
+                    ConsoleAssistance.WriteLine("This command is illegal in current status.", ConsoleColor.Red);
+                    return false;
+                } else return true;
+            }
         }
 
         static void OutputHelp() {
@@ -145,8 +190,8 @@ namespace BPMServer.Command {
             Console.WriteLine("\taddpkg name aka type desc - add a new package");
             Console.WriteLine("\teditpkg name aka type desc - edit a package (use ~ to keep the original value)");
             Console.WriteLine("\tdelpkg name - remove a package");
-            Console.WriteLine("\taddver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - add a new version (use - to define current time)");
-            Console.WriteLine("\teditver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script hash package-path - edit a version (use - to define current time. use ~ to keep the original value)");
+            Console.WriteLine("\taddver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script package-path - add a new version (use + to define current time)");
+            Console.WriteLine("\teditver name parent additional-desc timestamp suit-os dependency reverse-conflict conflict require-decompress internal-script package-path - edit a version (use + to define current time. use ~ to keep the original value)");
             Console.WriteLine("\tdelver name - remove a version");
             Console.WriteLine("");
             Console.WriteLine("Glory to BKT.");
@@ -220,7 +265,7 @@ namespace BPMServer.Command {
         [Value(3, Required = true)]
         public string Desc { get; set; }
 
-        
+
     }
 
     [Verb("delpkg")]
@@ -257,7 +302,7 @@ namespace BPMServer.Command {
         [Value(10, Required = true)]
         public string PackagePath { get; set; }
 
-        
+
     }
 
     [Verb("editver")]

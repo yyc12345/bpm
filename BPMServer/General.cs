@@ -11,7 +11,8 @@ namespace BPMServer {
 
         //general config and status
         public static bool IsMaintaining = false;
-        public static OutputStack GeneralOutput = new OutputStack();
+        public static ShareLib.Config ConfigManager;
+        public static RecordFile RecordFileManager;
 
         //transport
         public static TcpProcessor CoreTcpProcessor;

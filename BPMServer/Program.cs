@@ -20,6 +20,8 @@ namespace BPMServer {
             //package storage
             if (!Directory.Exists(Information.WorkPath.Enter("package").Path))
                 Directory.CreateDirectory(Information.WorkPath.Enter("package").Path);
+            if (!Directory.Exists(Information.WorkPath.Enter("logs").Path))
+                Directory.CreateDirectory(Information.WorkPath.Enter("logs").Path);
 
             var databasePath = Information.WorkPath.Enter("package.db").Path;
             var rsaPublic = Information.WorkPath.Enter("pub.key").Path;
@@ -43,11 +45,18 @@ namespace BPMServer {
             }
 
             #endregion
+            
 
             //init config and file pool
-            var config = Config.Read();
+            General.ConfigManager = new ShareLib.Config("config.cfg", new Dictionary<string, string>() {
+                    {"IPv4Port" , "3850" },
+                    {"IPv6Port" , "3851" },
+                    {"VerifyBytes", "" },
+                    {"EnableRecordFile", "True" }
+                });
             General.CoreFileReader = new FileReaderManager();
-            General.CoreTcpProcessor = new TcpProcessor(int.Parse(config["IPv4Port"]), int.Parse(config["IPv6Port"]));
+            General.RecordFileManager = new RecordFile(bool.Parse(General.ConfigManager.Configuration["EnableRecordFile"]));
+            General.CoreTcpProcessor = new TcpProcessor(int.Parse(General.ConfigManager.Configuration["IPv4Port"]), int.Parse(General.ConfigManager.Configuration["IPv6Port"]));
 
             //check parameter
             if (args.Length != 0 && args[0] == "maintain") {
@@ -58,8 +67,8 @@ namespace BPMServer {
                 //force update verify code
                 ConsoleAssistance.WriteLine("Updating verify code....", ConsoleColor.White);
                 General.VerifyBytes = SignVerifyHelper.SignData(databasePath, rsaPrivate);
-                config["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
-                Config.Save(config);
+                General.ConfigManager.Configuration["VerifyBytes"] = Convert.ToBase64String(General.VerifyBytes);
+                General.ConfigManager.Save();
 
                 General.CoreTcpProcessor.StartListen();
                 General.IsMaintaining = false;
@@ -69,16 +78,11 @@ namespace BPMServer {
             //================================================read circle
             string command = "";
             while (true) {
-                if (Console.ReadKey(true).Key == ConsoleKey.Tab) {
-                    General.GeneralOutput.Stop();
-                    ConsoleAssistance.Write($"BPMServer ({(General.IsMaintaining ? "Maintaining" : "Running")})> ", ConsoleColor.Green);
+                ConsoleAssistance.Write($"BPMServer ({(General.IsMaintaining ? "Maintaining" : "Running")})> ", ConsoleColor.Green);
 
-                    command = Console.ReadLine();
-                    if (CommandProcessor.Process(command)) break;
+                command = ImportStack.ReadLine();
+                if (CommandProcessor.Process(command)) break;
 
-                    //re-output words
-                    General.GeneralOutput.Release();
-                }
             }
 
             ConsoleAssistance.WriteLine("Server exit!", ConsoleColor.Yellow);
