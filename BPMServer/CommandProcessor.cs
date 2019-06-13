@@ -43,16 +43,16 @@ namespace BPMServer.Command {
                             Console.Write($"{item}: ");
                             Console.Write($"{General.ConfigManager.Configuration[item]}\n");
                         } else {
-                        if (opt.NewValue is null)
+                        if (opt.NewValue is null) {
                             if (General.ConfigManager.Configuration.Keys.Contains(opt.Key))
                                 Console.WriteLine(General.ConfigManager.Configuration[opt.Key]);
-                            else {
-                                if (General.ConfigManager.Configuration.Keys.Contains(opt.Key)) {
-                                    General.ConfigManager.Configuration[opt.Key] = opt.NewValue;
-                                    General.ConfigManager.Save();
-                                    Console.WriteLine("New value has been applied");
-                                }
+                        } else {
+                            if (General.ConfigManager.Configuration.Keys.Contains(opt.Key)) {
+                                General.ConfigManager.Configuration[opt.Key] = opt.NewValue;
+                                General.ConfigManager.Save();
+                                Console.WriteLine("New value has been applied");
                             }
+                        }
 
                     }
                     return false;

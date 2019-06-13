@@ -13,7 +13,7 @@ namespace ShareLib {
         public Config(string fileName, Dictionary<string, string> defaultValue) {
             _fileName = fileName;
             _defaultValue = JsonConvert.SerializeObject(defaultValue);
-
+            
             Configuration = Read();
         }
 
@@ -34,7 +34,7 @@ namespace ShareLib {
         }
 
         void Init() {
-            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter("config.cfg").Path, false, Encoding.UTF8)) {
+            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter(_fileName).Path, false, Encoding.UTF8)) {
                 fs.Write(_defaultValue);
                 fs.Close();
             }
