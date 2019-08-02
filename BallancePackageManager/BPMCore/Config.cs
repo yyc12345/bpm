@@ -10,6 +10,7 @@ using ShareLib;
 namespace BallancePackageManager.BPMCore {
     public static class Config {
 
+        /*
         public static Dictionary<string, string> Read() {
             if (!File.Exists(Information.WorkPath.Enter("config.cfg").Path))
                 Init();
@@ -66,7 +67,7 @@ namespace BallancePackageManager.BPMCore {
                 Console.Write($"{config[item]}\n");
             }
         }
-
+        */
     }
 
 }
