@@ -6,11 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using ShareLib;
 
-namespace BallancePackageManager.BPMCore {
-    static class Update {
+namespace BallancePackageManager {
 
-        public static void Core() {
-            var config = Config.Read()["Sources"].Split(':');
+    public partial class BPMInstance {
+
+        public void Update_CoreWrapper() {
+            CurrentStatus = BPMInstanceStatus.Working;
+            Update_Core();
+            BPMInstanceEvent_MethodDone?.Invoke();
+            CurrentStatus = BPMInstanceStatus.Ready;
+        }
+
+        private void Update_Core() {
+            var config = ConfigManager.Configuration["Sources"].Split(':');
             int port = int.Parse(config[config.Length - 1]);
             var host = string.Join(":", config, 0, config.Length - 2);
 
@@ -18,16 +26,16 @@ namespace BallancePackageManager.BPMCore {
             if (File.Exists(Information.WorkPath.Enter("package.db").Path))
                 File.Move(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("package.db.old").Path);
             var res = Download.DownloadDatabase();
-            Console.WriteLine(Download.JudgeDownloadResult(res));
+            BPMInstanceEvent_Message?.Invoke(Download.JudgeDownloadResult(res));
 
             if (res == Download.DownloadResult.OK) {
                 File.Delete(Information.WorkPath.Enter("package.db.old").Path);
-                Console.WriteLine(I18N.Core("Update_Success"));
+                BPMInstanceEvent_Message?.Invoke(I18N.Core("Update_Success"));
             } else {
                 //File.Delete(Information.WorkPath.Enter("package.db.old").Path);
                 if (File.Exists(Information.WorkPath.Enter("package.db.old").Path))
                     File.Move(Information.WorkPath.Enter("package.db.old").Path, Information.WorkPath.Enter("package.db").Path);
-                Console.WriteLine(I18N.Core("Update_Fail"));
+                BPMInstanceEvent_Message?.Invoke(I18N.Core("Update_Fail"));
             }
 
 

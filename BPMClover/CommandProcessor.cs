@@ -16,9 +16,9 @@ namespace BPMClover {
 
         public static bool Process(string[] command) {
             return parser.ParseArguments<HelpOption, UpdateOption, SearchOption, InstallOption, ListOption, RemoveOption, ConfigOption, ShowOption, DeployOption, GuideOption, CleanOption>(command)
-                .MapResult(
+                .MapResult(//todo: finish command processor
                 (UpdateOption opt) => {
-                    //todo: finish command processor
+                    
                     return false;
                 },
                 (SearchOption opt) => {

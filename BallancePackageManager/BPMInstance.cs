@@ -40,14 +40,6 @@ namespace BallancePackageManager {
 
         }
 
-        public bool CheckStatus(BPMInstanceStatus expect) {
-            if (expect == CurrentStatus) return true;
-            else {
-                BPMInstanceEvent_Error?.Invoke($"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
-                return false;
-            }
-        }
-
         #endregion
 
         BPMInstanceStatus CurrentStatus = BPMInstanceStatus.ErrorInit;
@@ -55,7 +47,11 @@ namespace BallancePackageManager {
 
         #region event list
 
+        public event Action BPMInstanceEvent_MethodDone;
+
         public event Action<string> BPMInstanceEvent_Error;
+
+        public event Action<string> BPMInstanceEvent_Message;
 
         #endregion
 
@@ -73,6 +69,14 @@ namespace BallancePackageManager {
             }
         }
 
+        public bool CheckStatus(BPMInstanceStatus expect) {
+            if (expect == CurrentStatus) return true;
+            else {
+                BPMInstanceEvent_Error?.Invoke($"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
+                return false;
+            }
+        }
+
         #endregion
 
 
@@ -81,6 +85,7 @@ namespace BallancePackageManager {
     public enum BPMInstanceStatus {
         ErrorInit,
         Ready,
+        Working,
         WaitInstall,
         WaitRemove
     }
