@@ -47,32 +47,36 @@ namespace BallancePackageManager {
 
         #region event list
 
-        public event Action BPMInstanceEvent_MethodDone;
+        public event Action<BPMInstanceMethod> BPMInstanceEvent_MethodDone;
 
-        public event Action<string> BPMInstanceEvent_Error;
+        public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Error;
 
-        public event Action<string> BPMInstanceEvent_Message;
+        public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Message;
 
         #endregion
 
         #region helper methods
 
-        private bool HaveGamePath {
-            get {
-                return ConfigManager.Configuration["GamePath"] != "";
+        private bool HaveGamePath(BPMInstanceMethod invokeMethod) {
+            if (ConfigManager.Configuration["GamePath"] != "") return true;
+            else {
+                BPMInstanceEvent_Error?.Invoke(invokeMethod, $"No vaild GamePath value.");//todo i18n
+                return false;
             }
         }
 
-        private bool HaveDatabase {
-            get {
-                return File.Exists(Information.WorkPath.Enter("package.db").Path);
+        private bool HaveDatabase(BPMInstanceMethod invokeMethod) {
+            if (File.Exists(Information.WorkPath.Enter("package.db").Path)) return true;
+            else {
+                BPMInstanceEvent_Error?.Invoke(invokeMethod, $"No database file.");//todo i18n
+                return false;
             }
         }
 
-        public bool CheckStatus(BPMInstanceStatus expect) {
+        private bool CheckStatus(BPMInstanceMethod invokeMethod, BPMInstanceStatus expect) {
             if (expect == CurrentStatus) return true;
             else {
-                BPMInstanceEvent_Error?.Invoke($"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
+                BPMInstanceEvent_Error?.Invoke(invokeMethod ,$"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
                 return false;
             }
         }
@@ -80,6 +84,19 @@ namespace BallancePackageManager {
         #endregion
 
 
+    }
+
+    public enum BPMInstanceMethod {
+        Update,
+        Search,
+        Install,
+        List,
+        Remove,
+        Config,
+        Show,
+        Deploy,
+        Guide,
+        Clean
     }
 
     public enum BPMInstanceStatus {

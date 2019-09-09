@@ -12,16 +12,14 @@ namespace BallancePackageManager {
     public partial class BPMInstance {
 
         public void Search_CoreWrapper(List<string> packageName) {
-            if (!HaveDatabase) {
-                BPMInstanceEvent_Error?.Invoke(I18N.Core("General_NoDatabase"));
-                return;
-            }
+            if (!CheckStatus(BPMInstanceMethod.Search, BPMInstanceStatus.Ready)) return;
+            if (!HaveDatabase(BPMInstanceMethod.Search)) return;
             CurrentStatus = BPMInstanceStatus.Working;
             Search_Core(packageName);
-            BPMInstanceEvent_MethodDone?.Invoke();
             CurrentStatus = BPMInstanceStatus.Ready;
+            BPMInstanceEvent_MethodDone?.Invoke(BPMInstanceMethod.Search);
         }
-        
+
         private void Search_Core(List<string> packageName) {
 
             packageName = (from item in packageName
