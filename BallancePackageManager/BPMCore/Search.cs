@@ -30,6 +30,7 @@ namespace BallancePackageManager {
             var packageDbConn = new PackageDatabase();
             packageDbConn.Open();
 
+            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Searching package table...");//todo: i18n
             //query package table first
             var packageTableReader = from item in packageDbConn.CoreDbContext.package
                                      where EF.Functions.Like(item.name, $"%{packageName}%") || EF.Functions.Like(item.desc, $"%{packageName}%") || EF.Functions.Like(item.aka, $"%{packageName}%")
@@ -40,6 +41,7 @@ namespace BallancePackageManager {
             foreach (var item in packageTableReader)
                 exportCache.Add(item.name);
 
+            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Searching version table...");//todo: i18n
             //query version table
             if (!omitVersion) {
                 var versionTableReader = from item in packageDbConn.CoreDbContext.version
@@ -51,33 +53,36 @@ namespace BallancePackageManager {
                         exportCache.Add(item.Key);
             }
 
+            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Collecting data...");//todo: i18n
             //query info
             var infomationReader = from item in packageDbConn.CoreDbContext.package
                                    where exportCache.Contains(item.name)
                                    select item;
-            
-            packageDbConn.Close();
 
+
+            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Querying install status...");//todo: i18n
             //query install package
             var packageDbConn2 = new InstalledDatabase();
             packageDbConn2.Open();
             var installedReader = (from item in packageDbConn2.CoreDbContext.installed
-                                  where exportCache.Contains(item.name.Split('@')[0])
-                                  select item.name.Split('@')[0]).ToList();
+                                   where exportCache.Contains(item.name.Split('@')[0])
+                                   select item.name.Split('@')[0]).ToList();
 
-            packageDbConn2.Close();
 
+            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Building query result...");//todo: i18n
             //construct export data
             Search_Export = new List<Search_PackageItem>();
-            foreach(var item in infomationReader) {
+            foreach (var item in infomationReader) {
                 Search_Export.Add(new Search_PackageItem() {
                     Name = item.name,
                     Description = item.desc,
-                    Aka=item.aka,
+                    Aka = item.aka,
                     IsInstalled = installedReader.Contains(item.name)
                 });
             }
-            
+
+            packageDbConn.Close();
+            packageDbConn2.Close();
         }
     }
 }
