@@ -6,87 +6,89 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
 using ShareLib;
+using BallancePackageManager.ExportModule;
+using Microsoft.EntityFrameworkCore;
 
 namespace BallancePackageManager {
 
     public partial class BPMInstance {
 
-        public void Search_CoreWrapper(List<string> packageName) {
+        public List<Search_PackageItem> Search_Export;
+
+        public void Search_CoreWrapper(bool omitVersion, string packageName) {
             if (!CheckStatus(BPMInstanceMethod.Search, BPMInstanceStatus.Ready)) return;
             if (!HaveDatabase(BPMInstanceMethod.Search)) return;
             CurrentStatus = BPMInstanceStatus.Working;
-            Search_Core(packageName);
+            Search_Core(omitVersion, packageName);
             CurrentStatus = BPMInstanceStatus.Ready;
             BPMInstanceEvent_MethodDone?.Invoke(BPMInstanceMethod.Search);
         }
 
-        private void Search_Core(List<string> packageName) {
-
-            packageName = (from item in packageName
-                           where item != ""
-                           select item).ToList();
-
-            //convert package name to regex words
-            var fullMatchedRgxList = new List<string>();
-            foreach (var item in packageName) {
-                fullMatchedRgxList.Add($@"((\w|\W)*{item}(\w|\W)*)");
-            }
+        private void Search_Core(bool omitVersion, string packageName) {
 
             //query
             var packageDbConn = new PackageDatabase();
             packageDbConn.Open();
 
-            string full_matched = String.Join("|", fullMatchedRgxList.ToArray());
-            var rgx = new Regex($@"({full_matched})");
-            var singleMatchedReader = (from item in packageDbConn.CoreDbContext.package
-                                       where rgx.IsMatch(item.name) || ((item.aka == null || item.aka == "") ? false : rgx.IsMatch(item.aka))
-                                       select item).ToList();
+            //query package table first
+            var packageTableReader = from item in packageDbConn.CoreDbContext.package
+                                     where EF.Functions.Like(item.name, $"%{packageName}%") || EF.Functions.Like(item.desc, $"%{packageName}%") || EF.Functions.Like(item.aka, $"%{packageName}%")
+                                     select item;
 
-            var fullMatchedReader = (from item in packageDbConn.CoreDbContext.package
-                                     where Search_ContainAll(item.name, packageName) || ((item.aka == null || item.aka == "") ? false : Search_ContainAll(item.aka, packageName))
-                                     select item).ToList();
+            //write into export value
+            List<string> exportCache = new List<string>();
+            foreach (var item in packageTableReader)
+                exportCache.Add(item.name);
 
-            //output
-            var folder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
+            //query version table
+            if (!omitVersion) {
+                var versionTableReader = from item in packageDbConn.CoreDbContext.version
+                                         where EF.Functions.Like(item.name, $"%{packageName}%") || EF.Functions.Like(item.additional_desc, $"%{packageName}%")
+                                         group item by item.parent;
 
-            //full matched
-            ConsoleAssistance.WriteLine(I18N.Core("Search_FullMatched"), ConsoleColor.Yellow);
-            Console.WriteLine();
-            foreach (var i in fullMatchedReader) {
-                ConsoleAssistance.Write(i.name, ConsoleColor.Green);
-                Console.Write(" @ " + i.version);
-
-                var detectFiles = folder.GetDirectories($"{i.name}@");
-                ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{I18N.Core("Search_InstalledVersion", detectFiles.Count().ToString())}]", ConsoleColor.Yellow);
-
-                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{i.aka}\n{I18N.Core("Search&Show_Type")}{I18N.Core($"PackageType_{((PackageType)i.type).ToString()}")}\n{I18N.Core("Search&Show_Desc")}{i.desc}\n\n");
+                foreach (var item in versionTableReader)
+                    if (!exportCache.Contains(item.Key))
+                        exportCache.Add(item.Key);
             }
-            ConsoleAssistance.WriteLine(I18N.Core("Search_Count", fullMatchedReader.Count.ToString()), ConsoleColor.Yellow);
-            Console.WriteLine();
 
-            //single matched
-            ConsoleAssistance.WriteLine(I18N.Core("Search_SingleMatched"), ConsoleColor.Yellow);
-            Console.WriteLine();
-            foreach (var i in singleMatchedReader) {
-                ConsoleAssistance.Write(i.name, ConsoleColor.Green);
-                Console.Write(" @ " + i.version);
-
-                var detectFiles = folder.GetDirectories($"{i.name}@");
-                ConsoleAssistance.Write(detectFiles.Count() == 0 ? "" : $" [{I18N.Core("Search_InstalledVersion", detectFiles.Count().ToString())}]", ConsoleColor.Yellow);
-
-                Console.Write($"\n{I18N.Core("Search&Show_Aka")}{i.aka}\n{I18N.Core("Search&Show_Type")}{I18N.Core($"PackageType_{((PackageType)i.type).ToString()}")}\n{I18N.Core("Search&Show_Desc")}{i.desc}\n\n");
-            }
-            ConsoleAssistance.WriteLine(I18N.Core("Search_Count", singleMatchedReader.Count.ToString()), ConsoleColor.Yellow);
-
+            //query info
+            var infomationReader = from item in packageDbConn.CoreDbContext.package
+                                   where exportCache.Contains(item.name)
+                                   select item;
+            
             packageDbConn.Close();
 
-        }
+            //query install package
+            var packageDbConn2 = new InstalledDatabase();
+            packageDbConn2.Open();
+            var installedReader = (from item in packageDbConn2.CoreDbContext.installed
+                                  where exportCache.Contains(item.name.Split('@')[0])
+                                  select item.name.Split('@')[0]).ToList();
 
-        private bool Search_ContainAll(string str, List<string> matchList) {
-            foreach (var item in matchList) {
-                if (!str.Contains(item)) return false;
+            packageDbConn2.Close();
+
+            //construct export data
+            Search_Export = new List<Search_PackageItem>();
+            foreach(var item in infomationReader) {
+                Search_Export.Add(new Search_PackageItem() {
+                    Name = item.name,
+                    Description = item.desc,
+                    Aka=item.aka,
+                    IsInstalled = installedReader.Contains(item.name)
+                });
             }
-            return true;
+            
         }
     }
+}
+
+namespace BallancePackageManager.ExportModule {
+
+    public class Search_PackageItem {
+        public string Name = "";
+        public string Aka = "";
+        public string Description = "";
+        public bool IsInstalled = false;
+    }
+
 }
