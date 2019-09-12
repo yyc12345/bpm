@@ -13,15 +13,15 @@ namespace BallancePackageManager {
 
     public partial class BPMInstance {
 
-        public List<Search_PackageItem> Search_Export;
+        public List<Search_ExportItem> Search_Export;
 
-        public void Search_CoreWrapper(bool omitVersion, string packageName) {
+        public void Search_Wrapper(bool omitVersion, string packageName) {
             if (!CheckStatus(BPMInstanceMethod.Search, BPMInstanceStatus.Ready)) return;
             if (!HaveDatabase(BPMInstanceMethod.Search)) return;
             CurrentStatus = BPMInstanceStatus.Working;
             Search_Core(omitVersion, packageName);
             CurrentStatus = BPMInstanceStatus.Ready;
-            BPMInstanceEvent_MethodDone?.Invoke(BPMInstanceMethod.Search);
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
         }
 
         private void Search_Core(bool omitVersion, string packageName) {
@@ -30,7 +30,7 @@ namespace BallancePackageManager {
             var packageDbConn = new PackageDatabase();
             packageDbConn.Open();
 
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Searching package table...");//todo: i18n
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Search, "Searching package table...");//todo: i18n
             //query package table first
             var packageTableReader = from item in packageDbConn.CoreDbContext.package
                                      where EF.Functions.Like(item.name, $"%{packageName}%") || EF.Functions.Like(item.desc, $"%{packageName}%") || EF.Functions.Like(item.aka, $"%{packageName}%")
@@ -41,7 +41,7 @@ namespace BallancePackageManager {
             foreach (var item in packageTableReader)
                 exportCache.Add(item.name);
 
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Searching version table...");//todo: i18n
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Search, "Searching version table...");//todo: i18n
             //query version table
             if (!omitVersion) {
                 var versionTableReader = from item in packageDbConn.CoreDbContext.version
@@ -53,14 +53,14 @@ namespace BallancePackageManager {
                         exportCache.Add(item.Key);
             }
 
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Collecting data...");//todo: i18n
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Search, "Collecting data...");//todo: i18n
             //query info
             var infomationReader = from item in packageDbConn.CoreDbContext.package
                                    where exportCache.Contains(item.name)
                                    select item;
 
 
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Querying install status...");//todo: i18n
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Search, "Querying install status...");//todo: i18n
             //query install package
             var packageDbConn2 = new InstalledDatabase();
             packageDbConn2.Open();
@@ -69,11 +69,11 @@ namespace BallancePackageManager {
                                    select item.name.Split('@')[0]).ToList();
 
 
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Search, "Building query result...");//todo: i18n
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Search, "Building query result...");//todo: i18n
             //construct export data
-            Search_Export = new List<Search_PackageItem>();
+            Search_Export = new List<Search_ExportItem>();
             foreach (var item in infomationReader) {
-                Search_Export.Add(new Search_PackageItem() {
+                Search_Export.Add(new Search_ExportItem() {
                     Name = item.name,
                     Description = item.desc,
                     Aka = item.aka,
@@ -89,7 +89,7 @@ namespace BallancePackageManager {
 
 namespace BallancePackageManager.ExportModule {
 
-    public class Search_PackageItem {
+    public class Search_ExportItem {
         public string Name = "";
         public string Aka = "";
         public string Description = "";

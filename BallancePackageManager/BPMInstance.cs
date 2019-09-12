@@ -48,10 +48,13 @@ namespace BallancePackageManager {
         #region event list
 
         public event Action<BPMInstanceMethod> BPMInstanceEvent_MethodDone;
+        private void OnBPMInstanceEvent_MethodDone(BPMInstanceMethod m) => BPMInstanceEvent_MethodDone?.Invoke(m);
 
         public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Error;
+        private void OnBPMInstanceEvent_Error(BPMInstanceMethod m, string d) => BPMInstanceEvent_Error?.Invoke(m, d);
 
         public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Message;
+        private void OnBPMInstanceEvent_Message(BPMInstanceMethod m, string d) => BPMInstanceEvent_Message?.Invoke(m, d);
 
         #endregion
 
@@ -60,7 +63,7 @@ namespace BallancePackageManager {
         private bool HaveGamePath(BPMInstanceMethod invokeMethod) {
             if (ConfigManager.Configuration["GamePath"] != "") return true;
             else {
-                BPMInstanceEvent_Error?.Invoke(invokeMethod, $"No vaild GamePath value.");//todo i18n
+                OnBPMInstanceEvent_Error(invokeMethod, $"No vaild GamePath value.");//todo i18n
                 return false;
             }
         }
@@ -68,7 +71,7 @@ namespace BallancePackageManager {
         private bool HaveDatabase(BPMInstanceMethod invokeMethod) {
             if (File.Exists(Information.WorkPath.Enter("package.db").Path)) return true;
             else {
-                BPMInstanceEvent_Error?.Invoke(invokeMethod, $"No database file.");//todo i18n
+                OnBPMInstanceEvent_Error(invokeMethod, $"No database file.");//todo i18n
                 return false;
             }
         }
@@ -76,7 +79,7 @@ namespace BallancePackageManager {
         private bool CheckStatus(BPMInstanceMethod invokeMethod, BPMInstanceStatus expect) {
             if (expect == CurrentStatus) return true;
             else {
-                BPMInstanceEvent_Error?.Invoke(invokeMethod ,$"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
+                OnBPMInstanceEvent_Error(invokeMethod ,$"Error status. Expect {expect} get {CurrentStatus}.");//todo i18n
                 return false;
             }
         }

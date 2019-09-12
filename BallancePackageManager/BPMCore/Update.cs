@@ -10,12 +10,12 @@ namespace BallancePackageManager {
 
     public partial class BPMInstance {
 
-        public void Update_CoreWrapper() {
+        public void Update_Wrapper() {
             if (!CheckStatus(BPMInstanceMethod.Update, BPMInstanceStatus.Ready)) return;
             CurrentStatus = BPMInstanceStatus.Working;
             Update_Core();
             CurrentStatus = BPMInstanceStatus.Ready;
-            BPMInstanceEvent_MethodDone?.Invoke(BPMInstanceMethod.Update);
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Update);
         }
 
         private void Update_Core() {
@@ -27,16 +27,16 @@ namespace BallancePackageManager {
             if (File.Exists(Information.WorkPath.Enter("package.db").Path))
                 File.Move(Information.WorkPath.Enter("package.db").Path, Information.WorkPath.Enter("package.db.old").Path);
             var res = Download.DownloadDatabase();
-            BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Update, Download.JudgeDownloadResult(res));
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.Update, Download.JudgeDownloadResult(res));
 
             if (res == Download.DownloadResult.OK) {
                 File.Delete(Information.WorkPath.Enter("package.db.old").Path);
-                BPMInstanceEvent_Message?.Invoke(BPMInstanceMethod.Update, I18N.Core("Update_Success"));
+                OnBPMInstanceEvent_Message(BPMInstanceMethod.Update, I18N.Core("Update_Success"));
             } else {
                 //File.Delete(Information.WorkPath.Enter("package.db.old").Path);
                 if (File.Exists(Information.WorkPath.Enter("package.db.old").Path))
                     File.Move(Information.WorkPath.Enter("package.db.old").Path, Information.WorkPath.Enter("package.db").Path);
-                BPMInstanceEvent_Error?.Invoke(BPMInstanceMethod.Update, I18N.Core("Update_Fail"));
+                OnBPMInstanceEvent_Error(BPMInstanceMethod.Update, I18N.Core("Update_Fail"));
             }
 
 

@@ -7,7 +7,14 @@ using System.IO;
 using Newtonsoft.Json;
 using ShareLib;
 
-namespace BallancePackageManager.BPMCore {
+namespace BallancePackageManager {
+
+    public partial class BPMInstance {
+
+        //public void
+
+    }
+
     public static class Config {
 
         /*

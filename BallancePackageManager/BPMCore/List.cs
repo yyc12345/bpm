@@ -6,48 +6,34 @@ using System.Threading.Tasks;
 using System.IO;
 using ShareLib;
 
-namespace BallancePackageManager.BPMCore {
-    public static class List {
-        public static void Core() {
-            
-            var installFolder = new DirectoryInfo(Information.WorkPath.Enter("cache").Enter("installed").Path);
+namespace BallancePackageManager {
 
-            var packageDbConn = new Database();
+    public partial class BPMInstance {
+
+        public List<string> List_Export;
+
+        public void List_Wrapper() {
+            if (!CheckStatus(BPMInstanceMethod.List, BPMInstanceStatus.Ready)) return;
+            if (!HaveDatabase(BPMInstanceMethod.List)) return;
+            CurrentStatus = BPMInstanceStatus.Working;
+            List_Core();
+            CurrentStatus = BPMInstanceStatus.Ready;
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.List);
+        }
+
+        private void List_Core() {
+
+            var packageDbConn = new InstalledDatabase();
             packageDbConn.Open();
 
-            int count = installFolder.GetDirectories().Count();
-            //int brokenCount = 0;
-            //int upgradableCount = 0;
-
-            foreach (var item in installFolder.GetDirectories()) {
-                Console.Write($"{item.Name}");
-
-                //check update and output type
-                var reader = (from item2 in packageDbConn.CoreDbContext.package
-                              where item2.name == item.Name.Split('@', StringSplitOptions.None)[0]
-                              select item2).ToList();
-                Console.Write(" [" + I18N.Core($"PackageType_{((PackageType)reader[0].type).ToString()}") + "]");
-                //if (reader["version"].ToString().Split(',').Last() != item.Name.Split('@')[1]) {
-                //    ConsoleAssistance.Write($" [{I18N.Core("List_Upgradable")}]", ConsoleColor.Yellow);
-                //    upgradableCount++;
-                //}
-
-                ////check broken
-                //var res = ScriptInvoker.Core(item.FullName, ScriptInvoker.InvokeMethod.Check, "");
-                //if (!res) {
-                //    ConsoleAssistance.Write($" [{I18N.Core("List_Broken")}]", ConsoleColor.Red);
-                //    brokenCount++;
-                //}
-
-                Console.Write("\n");
-            }
+            OnBPMInstanceEvent_Message(BPMInstanceMethod.List, "Querying installed table...");//todo: i18n
+            List_Export = (from item in packageDbConn.CoreDbContext.installed
+                           select item.name).ToList();
 
             packageDbConn.Close();
-
-            Console.WriteLine("");
-
-            if (count == 0) ConsoleAssistance.WriteLine(I18N.Core("General_None"), ConsoleColor.Yellow);
-            else ConsoleAssistance.WriteLine(I18N.Core("List_Total", count.ToString()), ConsoleColor.Yellow);
+            
         }
+
     }
+    
 }
