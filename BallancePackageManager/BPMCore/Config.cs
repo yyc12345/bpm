@@ -11,70 +11,55 @@ namespace BallancePackageManager {
 
     public partial class BPMInstance {
 
-        //public void
+        public Dictionary<string, string> Config_Export = new Dictionary<string, string>();
+
+        public string Config_ExportItem;
+
+        #region wrapper
+
+        public void Config_Wrapper() {
+            CurrentStatus = BPMInstanceStatus.Working;
+            Config_Core();
+            CurrentStatus = BPMInstanceStatus.Ready;
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
+        }
+
+        public void Config_Wrapper(string item) {
+            CurrentStatus = BPMInstanceStatus.Working;
+            Config_Core(item);
+            CurrentStatus = BPMInstanceStatus.Ready;
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
+        }
+
+        public void Config_Wrapper(string item, string newValue) {
+            CurrentStatus = BPMInstanceStatus.Working;
+            Config_Core(item, newValue);
+            CurrentStatus = BPMInstanceStatus.Ready;
+            OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
+        }
+
+        #endregion
+        
+        #region core
+
+        private void Config_Core() {
+            Config_Export.Clear();
+            foreach(var item in ConfigManager.Configuration.Keys) 
+                Config_Export.Add(item, ConfigManager.Configuration[item]);
+        }
+
+        private void Config_Core(string item) {
+            if (ConfigManager.Configuration.ContainsKey(item)) Config_ExportItem = ConfigManager.Configuration[item];
+            else OnBPMInstanceEvent_Error(BPMInstanceMethod.Config, "No matched item.");//todo:i18n
+        }
+
+        private void Config_Core(string item, string newValue) {
+            if (ConfigManager.Configuration.ContainsKey(item)) ConfigManager.Configuration[item] = newValue;
+            else OnBPMInstanceEvent_Error(BPMInstanceMethod.Config, "No matched item.");//todo:i18n
+        }
+
+        #endregion
 
     }
-
-    public static class Config {
-
-        /*
-        public static Dictionary<string, string> Read() {
-            if (!File.Exists(Information.WorkPath.Enter("config.cfg").Path))
-                Init();
-
-            Dictionary<string, string> data;
-            using (StreamReader fs = new StreamReader(Information.WorkPath.Enter("config.cfg").Path, Encoding.UTF8)) {
-                data = JsonConvert.DeserializeObject<Dictionary<string, string>>(fs.ReadToEnd());
-                fs.Close();
-            }
-            return data;
-        }
-
-        static void Init() {
-            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter("config.cfg").Path, false, Encoding.UTF8)) {
-                var cache = new Dictionary<string, string>() {
-                    {"Sources" , "yyc.bkt.moe:3850" },
-                    {"GamePath" , "" },
-                    {"Language", "en-us" }
-                };
-                fs.Write(JsonConvert.SerializeObject(cache));
-                fs.Close();
-            }
-        }
-
-        public static void Core() {
-            var cache = Read();
-            OutputStruct(cache);
-            return;
-        }
-        public static void Core(string itemName) {
-            var cache = Read();
-            if (cache.Keys.Contains(itemName)) Console.WriteLine(cache[itemName]);
-            else ConsoleAssistance.WriteLine(I18N.Core("Config_InvalidConfig"), ConsoleColor.Red);
-        }
-        public static void Core(string itemName, string newValue) {
-            var cache = Read();
-            if (cache.Keys.Contains(itemName)) {
-                cache[itemName] = newValue;
-                Save(cache);
-                Console.WriteLine(I18N.Core("Config_AppliedNewConfig"));
-            } else ConsoleAssistance.WriteLine(I18N.Core("Config_InvalidConfig"), ConsoleColor.Red);
-        }
-
-        public static void Save(Dictionary<string, string> config) {
-            using (StreamWriter fs = new StreamWriter(Information.WorkPath.Enter("config.cfg").Path, false, Encoding.UTF8)) {
-                fs.Write(JsonConvert.SerializeObject(config));
-                fs.Close();
-            }
-        }
-
-        static void OutputStruct(Dictionary<string,string> config) {
-            foreach (var item in config.Keys) {
-                Console.Write($"{item}: ");
-                Console.Write($"{config[item]}\n");
-            }
-        }
-        */
-    }
-
+    
 }

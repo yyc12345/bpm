@@ -47,11 +47,20 @@ namespace BallancePackageManager {
 
         #region event list
 
+        private bool ErrorCounter = false;
+
+        private void OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod m) => ErrorCounter = false;
+
         public event Action<BPMInstanceMethod> BPMInstanceEvent_MethodDone;
-        private void OnBPMInstanceEvent_MethodDone(BPMInstanceMethod m) => BPMInstanceEvent_MethodDone?.Invoke(m);
+        private void OnBPMInstanceEvent_MethodDone(BPMInstanceMethod m) {
+            if(!ErrorCounter) BPMInstanceEvent_MethodDone?.Invoke(m);
+        }
 
         public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Error;
-        private void OnBPMInstanceEvent_Error(BPMInstanceMethod m, string d) => BPMInstanceEvent_Error?.Invoke(m, d);
+        private void OnBPMInstanceEvent_Error(BPMInstanceMethod m, string d) {
+            ErrorCounter = true;
+            BPMInstanceEvent_Error?.Invoke(m, d);
+        }
 
         public event Action<BPMInstanceMethod, string> BPMInstanceEvent_Message;
         private void OnBPMInstanceEvent_Message(BPMInstanceMethod m, string d) => BPMInstanceEvent_Message?.Invoke(m, d);
