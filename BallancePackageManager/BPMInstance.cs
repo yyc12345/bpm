@@ -49,10 +49,29 @@ namespace BallancePackageManager {
 
         private bool ErrorCounter = false;
 
-        private void OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod m) => ErrorCounter = false;
+        private void OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod m) {
+            CurrentStatus = BPMInstanceStatus.Working;
+            ErrorCounter = false;
+        }
 
         public event Action<BPMInstanceMethod> BPMInstanceEvent_MethodDone;
         private void OnBPMInstanceEvent_MethodDone(BPMInstanceMethod m) {
+            switch (m) {
+                case BPMInstanceMethod.Update:
+                case BPMInstanceMethod.Search:
+                case BPMInstanceMethod.Install:
+                case BPMInstanceMethod.List:
+                case BPMInstanceMethod.Remove:
+                case BPMInstanceMethod.Config:
+                case BPMInstanceMethod.Show:
+                case BPMInstanceMethod.Deploy:
+                case BPMInstanceMethod.Guide:
+                case BPMInstanceMethod.Clean:
+                    CurrentStatus = BPMInstanceStatus.Ready;
+                    break;
+                default:
+                    break;
+            }
             if(!ErrorCounter) BPMInstanceEvent_MethodDone?.Invoke(m);
         }
 

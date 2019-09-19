@@ -18,23 +18,20 @@ namespace BallancePackageManager {
         #region wrapper
 
         public void Config_Wrapper() {
-            CurrentStatus = BPMInstanceStatus.Working;
+            OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod.Config);
             Config_Core();
-            CurrentStatus = BPMInstanceStatus.Ready;
             OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
         }
 
         public void Config_Wrapper(string item) {
-            CurrentStatus = BPMInstanceStatus.Working;
+            OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod.Config);
             Config_Core(item);
-            CurrentStatus = BPMInstanceStatus.Ready;
             OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
         }
 
         public void Config_Wrapper(string item, string newValue) {
-            CurrentStatus = BPMInstanceStatus.Working;
+            OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod.Config);
             Config_Core(item, newValue);
-            CurrentStatus = BPMInstanceStatus.Ready;
             OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
         }
 

@@ -18,9 +18,8 @@ namespace BallancePackageManager {
         public void Search_Wrapper(bool omitVersion, string packageName) {
             if (!CheckStatus(BPMInstanceMethod.Search, BPMInstanceStatus.Ready)) return;
             if (!HaveDatabase(BPMInstanceMethod.Search)) return;
-            CurrentStatus = BPMInstanceStatus.Working;
+            OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod.Config);
             Search_Core(omitVersion, packageName);
-            CurrentStatus = BPMInstanceStatus.Ready;
             OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.Search);
         }
 

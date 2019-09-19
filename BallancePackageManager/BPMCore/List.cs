@@ -15,9 +15,8 @@ namespace BallancePackageManager {
         public void List_Wrapper() {
             if (!CheckStatus(BPMInstanceMethod.List, BPMInstanceStatus.Ready)) return;
             if (!HaveDatabase(BPMInstanceMethod.List)) return;
-            CurrentStatus = BPMInstanceStatus.Working;
+            OnBPMInstanceEvent_MethodBegin(BPMInstanceMethod.Config);
             List_Core();
-            CurrentStatus = BPMInstanceStatus.Ready;
             OnBPMInstanceEvent_MethodDone(BPMInstanceMethod.List);
         }
 
